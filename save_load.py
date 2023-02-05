@@ -1,6 +1,7 @@
 import os
 import torch
 
+
 def save_checkpoint(save_path, model, optimizer, loss_KL, loss_recon, epoch_number):
     """SAVE_CHECKPOINT - save a model checkpoint as .tar
 
@@ -13,19 +14,20 @@ def save_checkpoint(save_path, model, optimizer, loss_KL, loss_recon, epoch_numb
         epoch_number (int): epoch index to label file. Also saved in checkpoint dict
     """
     # Create a save directory if it does not yet exist
-    save_dir,_ = os.path.split(save_path)
+    save_dir, _ = os.path.split(save_path)
     if not os.path.exists(save_dir): os.makedirs(save_dir)
-    
+
     # Write the model to a dictionary
     checkpoint = {"model": model.state_dict(),
                   "optimizer": optimizer.state_dict(),
                   "loss_KL": loss_KL,
                   "loss_recon": loss_recon,
                   "epoch": epoch_number}
-    
+
     # Save
     torch.save(checkpoint, save_path)
-    
+
+
 def load_from_checkpoint(checkpoint_path, model, optimizer):
     """LOAD_FROM_CHECKPOINT - load the state dicts for an initialized model and optimizer
         The model and optimizer must be initialized before calling this
@@ -41,10 +43,9 @@ def load_from_checkpoint(checkpoint_path, model, optimizer):
     """
     # Load the checkpoint dictionary
     checkpoint = torch.load(checkpoint_path)
-    
+
     # Apply the loaded state dicts to model and optimzier
     model.load_state_dict(checkpoint["model"])
     optimizer.load_state_dict(checkpoint["optimizer"])
-    
+
     return model, optimizer
-    
