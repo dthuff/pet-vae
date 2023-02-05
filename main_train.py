@@ -4,7 +4,8 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
 from model import VAE
 from loss import KLDivergence, L2Loss
-from train import train_loop, test_loop
+from train import train_loop, val_loop, test_loop
+from torch.utils.data import random_split
 #import matplotlib.pyplot as plt
 
 # Hyperparameters:
@@ -21,14 +22,19 @@ transform_composition = Compose([
                             ConvertImageDtype(torch.float)
                         ])
 
-train_dataset = DicomDataset(data_path, 
+dataset = DicomDataset(data_path, 
                             transform=transform_composition,
                             target_transform=transform_composition)
+
+train_dataset, val_dataset, test_dataset = random_split(dataset, [0.7, 0.1, 0.2], torch.Generator().manual_seed(91722))
 
 train_dataloader = DataLoader(train_dataset, 
                                 batch_size=batch_size, 
                                 shuffle=True)
 
+val_dataloader = DataLoader(val_dataset, 
+                            batch_size=batch_size, 
+                            shuffle=True)
 '''
 for batch, (X, y) in enumerate(train_dataloader):
     print(batch)
@@ -47,7 +53,10 @@ for t in range(max_epochs):
                 model=model, 
                 loss_fn_KL=KLDivergence(), 
                 loss_fn_recon=L2Loss(), 
-                optimizer=optimizer,
-                device=device)
+                optimizer=optimizer)
+    val_loop(dataloader=val_dataloader,
+                model=model,
+                loss_fn_KL=KLDivergence(), 
+                loss_fn_recon=L2Loss())
     # test_loop(test_dataloader, model, loss_fn)
 print("Done!")

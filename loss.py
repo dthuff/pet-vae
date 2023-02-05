@@ -5,11 +5,7 @@ class KLDivergence(nn.Module):
     "KL divergence between the estimated normal distribution and a prior distribution"
     def __init__(self):
         super(KLDivergence, self).__init__()
-        """
-        N :  the index N spans all dimensions of input 
-        N = H x W x D
-        """
-        self.N = 80*96*80
+
     def forward(self, z_mean, z_log_sigma):
         z_log_var = z_log_sigma * 2
         # See (2) from https://statproofbook.github.io/P/norm-kl.html.
