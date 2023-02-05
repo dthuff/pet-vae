@@ -1,17 +1,16 @@
 import os
 import torch
-from torch.cuda.amp import GradScaler
+from plotting import plot_examples
+scaler = torch.cuda.amp.GradScaler()
 
-scaler = GradScaler()
 
-
-def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer, amp_on):
+def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
     """TRAIN_LOOP - Runs training for one epoch
     
     Args:
         dataloader (torch.DataLoader): dataloader for training set
         model (nn.Module): model object
-        loss_fn_KL (nn.Module): Kullbeck-Liebler divergence loss
+        loss_fn_kl (nn.Module): Kullbeck-Liebler divergence loss
         loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
         optimizer (torch.Optimizer): model optimizer
         amp_on (Boolean): enable automatic mixed precision
@@ -27,7 +26,7 @@ def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer, amp_on):
         # Compute prediction and loss
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=amp_on):
             y_pred, z_mean, z_log_sigma = model(X)
-            loss_kl = loss_fn_KL(z_mean, z_log_sigma)
+            loss_kl = loss_fn_kl(z_mean, z_log_sigma)
             loss_recon = loss_fn_recon(y_pred, y)
             loss = loss_kl + loss_recon  # Consider weights here. IDK which loss is gonna dominate
 
@@ -38,15 +37,15 @@ def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer, amp_on):
         # optimizer.step()
         optimizer.zero_grad()
 
-        if batch % 10 == 0:
-            print(f"KL loss: {loss_kl.item():>4f}")
-            print(f"Recon loss: {loss_recon.item():>4f}")
+        if batch % 2 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            print(f"Total loss: {loss:.2f}  [{current:>2d}/{size:>2d}]")
+            print(f"    KL loss:{loss_kl.item():>20.2f}")
+            print(f"    Recon loss:{loss_recon.item():>20.2f}")
 
 
 def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
-    """VAL_LOOP - Runs validation
+    """VAL_LOOP - Runs validation for one epoch
 
     Args:
         dataloader (torch.DataLoader): dataloader for validation set
@@ -57,8 +56,10 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_kl, loss_recon = 0, 0
+    plotted_this_epoch = False
 
     with torch.no_grad():
+
         for X, y in dataloader:
             # Send the inputs X and labels y to the GPU
             X = X.cuda()
@@ -70,15 +71,18 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
             loss_recon += loss_fn_recon(y_pred, y).item()
 
             # TODO - plot some X and y_pred montages
-
+            if not plotted_this_epoch:
+                plot_examples(X.cpu(), y_pred.cpu())
+                plotted_this_epoch = True
             # TODO - plots N(0,1) against N(z_mean, z_log_sigma)
     loss_kl /= num_batches
     loss_recon /= num_batches
-    print(f"Val loss: \n   KL loss: {loss_kl :>0.1f}\n   Recon loss: {loss_recon:>8f} \n")
+
+    return loss_kl, loss_recon
 
 
 # TODO test_loop
-def test_loop(dataloader, model, loss_fn):
+def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     test_loss, correct = 0, 0

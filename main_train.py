@@ -30,7 +30,7 @@ dataset = DicomDataset(data_dir,
                        target_transform=transform_composition)
 
 train_dataset, val_dataset, test_dataset = random_split(dataset,
-                                                        [0.7, 0.1, 0.2],
+                                                        [0.02, 0.02, 0.96],
                                                         torch.Generator().manual_seed(91722))
 
 train_dataloader = DataLoader(train_dataset,
@@ -59,23 +59,27 @@ for t in range(max_epochs):
     print(f"Epoch {t + 1}\n-------------------------------")
     train_loop(dataloader=train_dataloader,
                model=model,
-               loss_fn_KL=KLDivergence(),
+               loss_fn_kl=KLDivergence(),
                loss_fn_recon=L2Loss(),
                optimizer=optimizer,
                amp_on=False)
 
-    loss_KL, loss_recon = val_loop(dataloader=val_dataloader,
+    loss_kl, loss_recon = val_loop(dataloader=val_dataloader,
                                    model=model,
                                    loss_fn_kl=KLDivergence(),
                                    loss_fn_recon=L2Loss())
-    val_loss = loss_KL + loss_recon
+    val_loss = loss_kl + loss_recon
+
+    print(f"Validation loss for epoch {t:>2d}:")
+    print(f"    KL loss: {loss_kl:.2f}")
+    print(f"    Recon loss: {loss_recon:.2f}")
 
     # Save a checkpoint every 5 epochs
     if t % 5 == 0:
         save_checkpoint(save_path=save_dir + "epoch_" + str(t) + ".tar",
                         model=model,
                         optimizer=optimizer,
-                        loss_KL=loss_KL,
+                        loss_KL=loss_kl,
                         loss_recon=loss_recon,
                         epoch_number=t)
 
@@ -85,7 +89,7 @@ for t in range(max_epochs):
         save_checkpoint(save_path=save_dir + "best_epoch.tar",
                         model=model,
                         optimizer=optimizer,
-                        loss_KL=loss_KL,
+                        loss_KL=loss_kl,
                         loss_recon=loss_recon,
                         epoch_number=t)
 
