@@ -1,6 +1,21 @@
+import os
 import torch
+from torch.cuda.amp import GradScaler
 
-def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer):
+scaler = GradScaler()
+
+def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer, amp_on):
+    """TRAIN_LOOP - Runs training for one epoch
+    
+    Args:
+        dataloader (torch.DataLoader): dataloader for training set
+        model (nn.Module): model object
+        loss_fn_KL (nn.Module): Kullbeck-Liebler divergence loss
+        loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
+        optimizer (torch.Optimizer): model optimizer
+        amp_on (Boolean): enable automatic mixed precision
+    """
+    
     size = len(dataloader.dataset)
     for batch, (X, y) in enumerate(dataloader):
 
@@ -9,15 +24,18 @@ def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer):
         y = y.cuda()
 
         # Compute prediction and loss
-        y_pred, z_mean, z_log_sigma = model(X)
-        loss_KL = loss_fn_KL(z_mean, z_log_sigma)
-        loss_recon = loss_fn_recon(y_pred, y)
-        loss = loss_KL + loss_recon # Consider weights here. IDK which loss is gonna dominate
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=amp_on):
+            y_pred, z_mean, z_log_sigma = model(X)
+            loss_KL = loss_fn_KL(z_mean, z_log_sigma)
+            loss_recon = loss_fn_recon(y_pred, y)
+            loss = loss_KL + loss_recon # Consider weights here. IDK which loss is gonna dominate
 
         # Backpropagation
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
+        # optimizer.step()
         optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
         if batch % 10 == 0:
             print(f"KL loss: {loss_KL.item():>4f}")
@@ -27,6 +45,14 @@ def train_loop(dataloader, model, loss_fn_KL, loss_fn_recon, optimizer):
 
 
 def val_loop(dataloader, model, loss_fn_KL, loss_fn_recon):
+    """VAL_LOOP - Runs validation
+
+    Args:
+        dataloader (torch.DataLoader): dataloader for validation set
+        model (nn.Module): model object
+        loss_fn_KL (nn.Module): Kullbeck-Liebler divergence loss
+        loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
+    """
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_KL, loss_recon = 0, 0
@@ -45,11 +71,12 @@ def val_loop(dataloader, model, loss_fn_KL, loss_fn_recon):
 
             # TODO - plot some X and y_pred montages
 
-            # TODO - plots N(0,1) against z_mean, z_log_sigma
+            # TODO - plots N(0,1) against N(z_mean, z_log_sigma)
     loss_KL /= num_batches
     loss_recon /= num_batches
     print(f"Val loss: \n   KL loss: {(loss_KL):>0.1f}\n   Recon loss: {loss_recon:>8f} \n")
 
+# TODO test_loop
 def test_loop(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
