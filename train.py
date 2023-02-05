@@ -37,14 +37,14 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
         # optimizer.step()
         optimizer.zero_grad()
 
-        if batch % 2 == 0:
+        if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
             print(f"Total loss: {loss:.2f}  [{current:>2d}/{size:>2d}]")
             print(f"    KL loss:{loss_kl.item():>20.2f}")
             print(f"    Recon loss:{loss_recon.item():>20.2f}")
 
 
-def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
+def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, epoch_number):
     """VAL_LOOP - Runs validation for one epoch
 
     Args:
@@ -52,6 +52,7 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
         model (nn.Module): model object
         loss_fn_kl (nn.Module): Kullbeck-Liebler divergence loss
         loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
+        epoch_number (int): epoch counter for saving plots
     """
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
@@ -72,8 +73,9 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon):
 
             # TODO - plot some X and y_pred montages
             if not plotted_this_epoch:
-                plot_examples(X.cpu(), y_pred.cpu())
+                plot_examples(X.cpu(), y_pred.cpu(), epoch_number)
                 plotted_this_epoch = True
+
             # TODO - plots N(0,1) against N(z_mean, z_log_sigma)
     loss_kl /= num_batches
     loss_recon /= num_batches

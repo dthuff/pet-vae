@@ -11,7 +11,7 @@ from torch.utils.data import random_split
 # Hyper parameters:
 batch_size = 64
 learning_rate = 0.001
-max_epochs = 100
+max_epochs = 300
 weight_decay = 5e-7
 device = 'cuda'
 data_dir = '/home/daniel/Projects/pet-vae/data/ACRIN-NSCLC-FDG-PET-cleaned/'
@@ -30,7 +30,7 @@ dataset = DicomDataset(data_dir,
                        target_transform=transform_composition)
 
 train_dataset, val_dataset, test_dataset = random_split(dataset,
-                                                        [0.02, 0.02, 0.96],
+                                                        [0.8, 0.1, 0.1],
                                                         torch.Generator().manual_seed(91722))
 
 train_dataloader = DataLoader(train_dataset,
@@ -54,6 +54,7 @@ optimizer = torch.optim.Adam(model.parameters(),
 
 # Training loop
 best_val_loss = 10000000000000
+best_val_epoch = 0
 
 for t in range(max_epochs):
     print(f"Epoch {t + 1}\n-------------------------------")
@@ -67,7 +68,8 @@ for t in range(max_epochs):
     loss_kl, loss_recon = val_loop(dataloader=val_dataloader,
                                    model=model,
                                    loss_fn_kl=KLDivergence(),
-                                   loss_fn_recon=L2Loss())
+                                   loss_fn_recon=L2Loss(),
+                                   epoch_number=t)
     val_loss = loss_kl + loss_recon
 
     print(f"Validation loss for epoch {t:>2d}:")
@@ -79,19 +81,23 @@ for t in range(max_epochs):
         save_checkpoint(save_path=save_dir + "epoch_" + str(t) + ".tar",
                         model=model,
                         optimizer=optimizer,
-                        loss_KL=loss_kl,
+                        loss_kl=loss_kl,
                         loss_recon=loss_recon,
                         epoch_number=t)
 
     # If this epoch has the best validation loss, save it to "best_epoch.tar"
     if val_loss < best_val_loss:
         best_val_loss = val_loss
+        best_val_epoch = t
         save_checkpoint(save_path=save_dir + "best_epoch.tar",
                         model=model,
                         optimizer=optimizer,
-                        loss_KL=loss_kl,
+                        loss_kl=loss_kl,
                         loss_recon=loss_recon,
                         epoch_number=t)
+
+print("Done training.")
+print("Best epoch was: " + str(best_val_epoch))
 
 # Load the best model and run inference on the test set
 model_test = VAE()

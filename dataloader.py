@@ -14,7 +14,6 @@ class DicomDataset(Dataset):
 
     def __len__(self):
         return len(self.img_list)
-        # return len(os.listdir(self.img_dir))
 
     def __getitem__(self, index):
         img_path = os.path.join(self.img_dir, self.img_list[index])

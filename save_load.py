@@ -2,14 +2,14 @@ import os
 import torch
 
 
-def save_checkpoint(save_path, model, optimizer, loss_KL, loss_recon, epoch_number):
+def save_checkpoint(save_path, model, optimizer, loss_kl, loss_recon, epoch_number):
     """SAVE_CHECKPOINT - save a model checkpoint as .tar
 
     Args:
         save_path (string): full path to .tar to be saved
         model (nn.Module): model to be saved
         optimizer (nn.Module): optimizer to be saved
-        loss_KL (_type_): KL loss at this point - you pick val or train loss
+        loss_kl (_type_): KL loss at this point - you pick val or train loss
         loss_recon (_type_): Reconstruction loss at this point - you pick val or train loss
         epoch_number (int): epoch index to label file. Also saved in checkpoint dict
     """
@@ -20,7 +20,7 @@ def save_checkpoint(save_path, model, optimizer, loss_KL, loss_recon, epoch_numb
     # Write the model to a dictionary
     checkpoint = {"model": model.state_dict(),
                   "optimizer": optimizer.state_dict(),
-                  "loss_KL": loss_KL,
+                  "loss_KL": loss_kl,
                   "loss_recon": loss_recon,
                   "epoch": epoch_number}
 
