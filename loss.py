@@ -17,13 +17,12 @@ class KLDivergence(nn.Module):
         return 0.5 * ((z_mean**2 + z_log_var.exp() - z_log_var - 1).sum())
 
 class L2Loss(nn.Module): 
-    "Measuring the `Euclidian distance` between prediction and ground truh using `L2 Norm`"
+    "L2 norm between predictions x and label y"
     def __init__(self):
         super(L2Loss, self).__init__()
         
     def forward(self, x, y): 
-        N = y.shape[0]*y.shape[1]*y.shape[2]*y.shape[3]*y.shape[4]
-        return  ( (x - y)**2 ).sum() / N
+        return  ( (x - y)**2 ).mean()
 
 class L1Loss(nn.Module): 
     "Measuring the `Euclidian distance` between prediction and ground truh using `L1 Norm`"
@@ -31,5 +30,4 @@ class L1Loss(nn.Module):
         super(L1Loss, self).__init__()
         
     def forward(self, x, y): 
-        N = y.shape[0]*y.shape[1]*y.shape[2]*y.shape[3]*y.shape[4]
-        return  ( (x - y).abs()).sum() / N
+        return  ( (x - y).abs() ).mean()

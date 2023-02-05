@@ -10,8 +10,8 @@ class conv_block(nn.Module):
     def __init__(self, channels_in, channels_out, kernel_size, stride=1, padding=1):
         super(conv_block, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv3d(channels_in, channels_out, kernel_size=kernel_size, stride=stride, padding=padding),  
-            nn.BatchNorm3d(channels_out),
+            nn.Conv2d(channels_in, channels_out, kernel_size=kernel_size, stride=stride, padding=padding),  
+            nn.BatchNorm2d(channels_out),
             nn.ReLU(inplace=True),
         )
     def forward(self, x):
@@ -24,12 +24,12 @@ class ResNet_block(nn.Module):
     def __init__(self, channels, kernel_size, stride=1, padding=1):
         super(ResNet_block, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv3d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding), 
-            nn.BatchNorm3d(channels),
+            nn.Conv2d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding), 
+            nn.BatchNorm2d(channels),
             nn.ReLU(inplace=True),
 
-            nn.Conv3d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding),  
-            nn.BatchNorm3d(channels),
+            nn.Conv2d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding),  
+            nn.BatchNorm2d(channels),
             nn.ReLU(inplace=True),
         )
     def forward(self, x):
@@ -38,12 +38,12 @@ class ResNet_block(nn.Module):
 
 
 class up_conv_block(nn.Module):
-    "Reduce the number of features by 2 using Conv with kernel size 1x1x1 and double the spatial dimension using 3D trilinear upsampling"
+    "Reduce the number of features by 2 using Conv with kernel size 1x1x1 and double the spatial dimension using 2D trilinear upsampling"
     def __init__(self, channels_in, channels_out, kernel_size=1, scale_factor=2, align_corners=False):
         super(up_conv_block, self).__init__()
         self.up = nn.Sequential(
-            nn.Conv3d(channels_in, channels_out, kernel_size=kernel_size),
-            nn.Upsample(scale_factor=scale_factor, mode='trilinear', align_corners=align_corners),
+            nn.Conv2d(channels_in, channels_out, kernel_size=kernel_size),
+            nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=align_corners),
         )
     def forward(self, x):
         return self.up(x)
@@ -54,19 +54,19 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.conv1 = conv_block(channels_in=1, channels_out=32, kernel_size=3)
         self.res_block1 = ResNet_block(channels=32, kernel_size=3)
-        self.MaxPool1 = nn.MaxPool3d(3, stride=2, padding=1)
+        self.MaxPool1 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.conv2 = conv_block(channels_in=32, channels_out=64, kernel_size=3)
-        self.res_block2 = ResNet_block(channels=64, kernel_size=3, num_groups=16)
-        self.MaxPool2 = nn.MaxPool3d(3, stride=2, padding=1)
+        self.res_block2 = ResNet_block(channels=64, kernel_size=3)
+        self.MaxPool2 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.conv3 = conv_block(channels_in=64, channels_out=128, kernel_size=3)
         self.res_block3 = ResNet_block(channels=128, kernel_size=3)
-        self.MaxPool3 = nn.MaxPool3d(3, stride=2, padding=1)
+        self.MaxPool3 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.conv4 = conv_block(channels_in=128, channels_out=256, kernel_size=3)
         self.res_block4 = ResNet_block(channels=256, kernel_size=3)
-        self.MaxPool4 = nn.MaxPool3d(3, stride=2, padding=1)
+        self.MaxPool4 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.reset_parameters()
       
@@ -102,16 +102,16 @@ class Decoder(nn.Module):
     def __init__(self, latent_dim):
         super(Decoder, self).__init__()
         self.latent_dim = latent_dim
-        self.linear_up = nn.Linear(latent_dim, 256*150)
+        self.linear_up = nn.Linear(latent_dim, 16384) #2nd arg was 256*150
         self.relu = nn.ReLU()
-        self.upsize4 = up_conv_block(channels_in=256, channels_out=128, kernel_size=1, scale=2)
-        self.res_block4 = ResNet_block(channels=128, kernel_size=3, num_groups=16)
-        self.upsize3 = up_conv_block(channels_in=128, channels_out=64, kernel_size=1, scale=2)
-        self.res_block3 = ResNet_block(channels=64, kernel_size=3, num_groups=16)        
-        self.upsize2 = up_conv_block(channels_in=64, channels_out=32, kernel_size=1, scale=2)
-        self.res_block2 = ResNet_block(channels=32, kernel_size=3, num_groups=16)   
-        self.upsize1 = up_conv_block(channels_in=32, channels_out=1, kernel_size=1, scale=2)
-        self.res_block1 = ResNet_block(channels=1, kernel_size=3, num_groups=1)   
+        self.upsize4 = up_conv_block(channels_in=256, channels_out=128, kernel_size=1, scale_factor=2)
+        self.res_block4 = ResNet_block(channels=128, kernel_size=3)
+        self.upsize3 = up_conv_block(channels_in=128, channels_out=64, kernel_size=1, scale_factor=2)
+        self.res_block3 = ResNet_block(channels=64, kernel_size=3)        
+        self.upsize2 = up_conv_block(channels_in=64, channels_out=32, kernel_size=1, scale_factor=2)
+        self.res_block2 = ResNet_block(channels=32, kernel_size=3)   
+        self.upsize1 = up_conv_block(channels_in=32, channels_out=1, kernel_size=1, scale_factor=2)
+        self.res_block1 = ResNet_block(channels=1, kernel_size=3)   
 
         self.reset_parameters()
       
@@ -124,7 +124,8 @@ class Decoder(nn.Module):
         x4_ = self.linear_up(x)
         x4_ = self.relu(x4_)
 
-        x4_ = x4_.view(-1, 256, 5, 6, 5)
+        #x4_ = x4_.view(-1, 256, 5, 6, 5)
+        x4_ = x4_.view(-1, 256, 8, 8)
         x4_ = self.upsize4(x4_) 
         x4_ = self.res_block4(x4_)
 
@@ -145,8 +146,8 @@ class VAE(nn.Module):
         super(VAE, self).__init__()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.latent_dim = latent_dim
-        self.z_mean = nn.Linear(256*150, latent_dim)
-        self.z_log_sigma = nn.Linear(256*150, latent_dim)
+        self.z_mean = nn.Linear(16384, latent_dim) #First arg was 256*150
+        self.z_log_sigma = nn.Linear(16384, latent_dim)
         self.epsilon = torch.normal(size=(1, latent_dim), mean=0, std=1.0, device=self.device)
         self.encoder = Encoder()
         self.decoder = Decoder(latent_dim)

@@ -1,11 +1,12 @@
 import torch
+from torchvision import transforms
 import numpy as np
-import torchio as tio
 import os, shutil
 import time
 import random
 import pandas as pd 
 from torch.utils.data import Dataset
+from pydicom import dcmread
 from glob import glob
 
 class DicomDataset(Dataset):
@@ -16,11 +17,13 @@ class DicomDataset(Dataset):
         self.target_transform = target_transform
 
     def __len__(self):
-        return len(os.listdir(self.img_dir))
+        return(len(self.img_list))
+        #return len(os.listdir(self.img_dir))
 
     def __getitem__(self, index):
         img_path = os.path.join(self.img_dir, self.img_list[index])
-        image = tio.ScalarImage(img_path).data
+        image = dcmread(img_path).pixel_array
+        image = image.astype('float32')
         label = image
         if self.transform:
             image = self.transform(image)
