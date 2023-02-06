@@ -42,10 +42,12 @@ def load_from_checkpoint(checkpoint_path, model, optimizer):
         optimizer (nn.Module): The optimized object with state_dict loaded from checkpoint
     """
     # Load the checkpoint dictionary
-    checkpoint = torch.load(checkpoint_path)
+    checkpoint = torch.load(checkpoint_path, map_location={"cpu": "cuda:0"})
 
-    # Apply the loaded state dicts to model and optimzier
+    # Apply the loaded state dicts to model and optimizer
     model.load_state_dict(checkpoint["model"])
     optimizer.load_state_dict(checkpoint["optimizer"])
+
+    print("Resuming from epoch: " + str(checkpoint["epoch"]))
 
     return model, optimizer

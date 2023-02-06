@@ -1,10 +1,19 @@
+import os
 import matplotlib.pyplot as plt
-import torch
 import numpy as np
 
 
-def plot_examples(X, y_pred, epoch_number):
+def plot_examples(X, y_pred, plot_path):
+    """
 
+    Args:
+        X (tensor) : model inputs
+        y_pred (tensor) : model reconstruction
+        plot_path (string) : path to folder to save images
+
+    Returns:
+
+    """
     # Limit plot to 32 slices -
     X = X[:32, :, :, :]
     y_pred = y_pred[:32, :, :, :]
@@ -26,4 +35,29 @@ def plot_examples(X, y_pred, epoch_number):
         a.axis('off')
     plt.subplots_adjust(wspace=0, hspace=0, left=0, right=1, bottom=0, top=1)
 
-    plt.savefig("./saved_models/validation_images_epoch_" + str(epoch_number) + ".png", dpi=150)
+    # Create the save_dir if it does not exist
+    save_dir, _ = os.path.split(plot_path)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    plt.savefig(plot_path, dpi=150)
+    plt.close(fig)
+    print("Saved example image to: " + plot_path)
+
+
+def plot_and_save_loss(loss_dict, save_dir):
+    """
+
+    Args:
+        loss_dict (dictionary) : dictionary containing lists of loss values per epoch
+        save_dir (string) : path to save directory
+
+    Returns:
+
+    """
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 6))
+    for loss in loss_dict.values():
+        ax.plot(loss)
+    ax.legend(loss_dict.keys())
+    plt.savefig(save_dir + "loss.png", dpi=150)
+    plt.close(fig)
