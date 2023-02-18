@@ -3,6 +3,9 @@
 
 Trained using data from ACRIN-NSCLC-FDG-PET hosted by The Cancer Imaging Archive. Data available from: https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=39879162
 
-Odd columns: model input. Even columns: model reconstruction.
+Figure 1: randomly selected example axial PET slices from the test set after 190 epochs. Odd columns are model input, even columns are model reconstructions.
 ![alt text](https://github.com/dthuff/pet-vae/blob/master/saved_models/validation_images_epoch_194.png?raw=true)
 
+
+Figure 2: Loss curve for the VAE. Total loss was the sum of Kullback-Liebler (KL) and reconstruction L2 (RECON) losses.
+![alt text](https://github.com/dthuff/pet-vae/blob/master/saved_models/loss.png?raw=true)
