@@ -1,9 +1,10 @@
-import torch
 import torch.nn as nn
 
 
 class KLDivergence(nn.Module):
-    "KL divergence between the estimated normal distribution and a prior distribution"
+    """
+    Kullback-Leibler Divergence loss for enforcing normality of latent representation
+    """
 
     def __init__(self):
         super(KLDivergence, self).__init__()
@@ -16,8 +17,9 @@ class KLDivergence(nn.Module):
 
 
 class L2Loss(nn.Module):
-    "L2 norm between predictions x and label y"
-
+    """
+    L2 reconstruction loss"
+    """
     def __init__(self):
         super(L2Loss, self).__init__()
 
@@ -26,8 +28,9 @@ class L2Loss(nn.Module):
 
 
 class L1Loss(nn.Module):
-    "Measuring the `Euclidian distance` between prediction and ground truh using `L1 Norm`"
-
+    """
+    L1 reconstruction loss
+    """
     def __init__(self):
         super(L1Loss, self).__init__()
 
