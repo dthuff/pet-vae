@@ -1,5 +1,5 @@
 """
-Adapted from https://github.com/duyphuongcri/Variational-AutoEncoder by Duy-Phuong Dao
+Architecture adapted from https://github.com/duyphuongcri/Variational-AutoEncoder
 """
 
 import torch
@@ -159,7 +159,7 @@ class Decoder(nn.Module):
 
 class VAE(nn.Module):
     """
-    Class for the variational autoencoder
+    Variational autoencoder consists of encoder + decoder
     """
     def __init__(self, latent_dim=128):
         super(VAE, self).__init__()
