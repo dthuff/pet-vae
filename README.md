@@ -3,6 +3,8 @@
 
 Trained using data from ACRIN-NSCLC-FDG-PET hosted by The Cancer Imaging Archive. Data available from: https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=39879162
 
+Converges in ~3-5 hours training on a NVIDIA 1080 (8 GB).
+
 Figure 1: randomly selected example axial PET slices from the test set after 190 epochs. Odd columns are model input, even columns are model reconstructions.
 ![alt text](https://github.com/dthuff/pet-vae/blob/master/saved_models/validation_images_epoch_194.png?raw=true)
 
