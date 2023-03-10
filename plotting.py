@@ -56,8 +56,16 @@ def plot_and_save_loss(loss_dict, save_dir):
 
     """
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 6))
-    for loss in loss_dict.values():
-        ax.plot(loss)
-    ax.legend(loss_dict.keys())
+    ax2 = ax.twinx()
+
+    ax.plot(loss_dict["TRAIN_LOSS_KL"], c='blue')
+    ax.plot(loss_dict["VAL_LOSS_KL"], c='cornflowerblue')
+    ax2.plot(loss_dict["TRAIN_LOSS_RECON"], c='red')
+    ax2.plot(loss_dict["VAL_LOSS_RECON"], c='lightcoral')
+
+    ax.set_ylabel("KL Loss")
+    ax2.set_ylabel("Recon Loss")
+    fig.legend(["KL loss (train)", "KL loss (val)", "Recon loss (train)", "Recon loss (val)"],
+               bbox_to_anchor=(0.9, 0.9))
     plt.savefig(save_dir + "loss.png", dpi=150)
     plt.close(fig)

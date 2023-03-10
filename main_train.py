@@ -1,3 +1,4 @@
+import os
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
@@ -19,8 +20,10 @@ train_val_test_split = [0.8, 0.1, 0.1]  # Proportion of data for training, valid
 device = 'cuda'
 resume = False  # Resume training from best_epoch.tar?
 
-data_dir = '/home/daniel/Projects/pet-vae/data/ACRIN-NSCLC-FDG-PET-cleaned/'
+data_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
 save_dir = './saved_models/'
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
 
 # Transforms
 transform_composition = Compose([
@@ -99,7 +102,6 @@ for t in range(max_epochs):
     loss_dict["VAL_LOSS_KL"].append(val_loss_kl)
     loss_dict["VAL_LOSS_RECON"].append(val_loss_recon)
 
-    # TODO - plot loss over time and save
     plot_and_save_loss(loss_dict=loss_dict,
                        save_dir=save_dir)
 

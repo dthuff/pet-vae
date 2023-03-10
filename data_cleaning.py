@@ -3,7 +3,8 @@ import shutil
 
 # Walk through ./data/ and find folders containing whole-body, attenuation corrected PET dicoms.
 
-data_dir = './data/ACRIN-NSCLC-FDG-PET/'
+data_dir = '/home/daniel/datasets/manifest-1580838164030/ACRIN-NSCLC-FDG-PET/'
+out_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
 
 ndirs = 0
 good_pet_paths = []
@@ -44,9 +45,6 @@ for patient in os.listdir(data_dir):
                 for f in os.listdir(series_dir):
                     os.remove(os.path.join(series_dir, f))
 
-            print(len(candidate_pet_paths))
-            print(len(candidate_ct_paths))
-
         # If we've found exactly 1 candidate dir for PET and CT, and they each
         # contain the same number of dicoms, add 'em to the list of good directories
         if len(candidate_pet_paths) == 1 and \
@@ -58,18 +56,18 @@ for patient in os.listdir(data_dir):
 # Using this approach, we get 152 matched PET and CT folders.
 # Thats good enough for now. If we end up needing more training data, I can come back and try to
 # increase our yield here.
-print(str(len(good_pet_paths)))
-print(str(len(good_ct_paths)))
+print("Found " + str(len(good_pet_paths)) + " useful PET directories.")
+print("Found " + str(len(good_ct_paths)) + " useful CT directories.")
 
 # Now, copy our cleaned set of good CT and PET directories to a cleaned location with a clean file structure
-out_dir = './data/ACRIN-NSCLC-FDG-PET-cleaned/'
-if not os.path.exists(out_dir): os.makedirs(out_dir)
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
 
 for ct_path, pet_path in zip(good_ct_paths, good_pet_paths):
     path_parts = ct_path.split('/')
 
-    patient_id = path_parts[3]
-    timepoint_id = path_parts[4].replace(' ', '_')
+    patient_id = path_parts[6]
+    timepoint_id = path_parts[7].replace(' ', '_')
 
     subject_id = patient_id + '_' + timepoint_id
     print(subject_id)

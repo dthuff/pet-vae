@@ -85,12 +85,17 @@ class Encoder(nn.Module):
         self.res_block4 = ResNetBlock(channels=256, kernel_size=3)
         self.MaxPool4 = nn.MaxPool2d(3, stride=2, padding=1)
 
-        self.reset_parameters()
+        self.kaiming_init()
 
-    def reset_parameters(self):
+    def xavier_init(self):
         for weight in self.parameters():
-            stdv = 1.0 / math.sqrt(weight.size(0))
-            torch.nn.init.uniform_(weight, -stdv, stdv)
+            std_dev = 1.0 / math.sqrt(weight.size(0))
+            torch.nn.init.uniform_(weight, -std_dev, std_dev)
+
+    def kaiming_init(self):
+        for param in self.parameters():
+            std = math.sqrt(2 / param.size(0))
+            torch.nn.init.normal_(param, mean=0, std=std)
 
     def forward(self, x):
         x1 = self.conv1(x)
@@ -129,12 +134,17 @@ class Decoder(nn.Module):
         self.upsize1 = UpConvBlock(channels_in=32, channels_out=1, kernel_size=1, scale_factor=2)
         self.res_block1 = ResNetBlock(channels=1, kernel_size=3)
 
-        self.reset_parameters()
+        self.kaiming_init()
 
-    def reset_parameters(self):
-        for weight in self.parameters():
-            stdv = 1.0 / math.sqrt(weight.size(0))
-            torch.nn.init.uniform_(weight, -stdv, stdv)
+    def xavier_init(self):
+        for param in self.parameters():
+            std_dev = 1.0 / math.sqrt(param.size(0))
+            torch.nn.init.uniform_(param, -std_dev, std_dev)
+
+    def kaiming_init(self):
+        for param in self.parameters():
+            std = math.sqrt(2 / param.size(0))
+            torch.nn.init.normal_(param, mean=0, std=std)
 
     def forward(self, x):
         x4_ = self.linear_up(x)
