@@ -1,11 +1,9 @@
 import torch
-from plotting import plot_examples
-import torch
 
+from performance_metrics import calculate_psnr, calculate_ssim
 from plotting import plot_examples
 
 scaler = torch.cuda.amp.GradScaler()
-
 
 def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
     """TRAIN_LOOP - Runs training for one epoch
@@ -121,7 +119,9 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_kl, loss_recon = 0, 0
-    plotted_this_epoch = False
+    psnr = [] # A list of per-batch PSNR values
+    ssim = [] # A list of per-image SSIM values
+    ssim_norm = [] # A list of per-image SSIM values computed on normalized images
 
     with torch.no_grad():
         for batch, (X, y) in enumerate(dataloader):
@@ -138,6 +138,11 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
             plot_examples(X=X.cpu(),
                           y_pred=y_pred.cpu(),
                           plot_path=plot_save_dir + "test_examples_batch_" + str(batch) + ".png")
+
+            psnr = psnr.append(calculate_psnr(y, y_pred))
+            s, s_norm = calculate_ssim(y, y_pred)
+            ssim = ssim.extend(s)
+            ssim_norm = ssim_norm.extend(s_norm)
 
     loss_kl /= num_batches
     loss_recon /= num_batches

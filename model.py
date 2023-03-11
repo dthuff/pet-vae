@@ -181,12 +181,12 @@ class VAE(nn.Module):
         self.encoder = Encoder()
         self.decoder = Decoder(latent_dim)
 
-        self.reset_parameters()
+        self.kaiming_init()
 
-    def reset_parameters(self):
-        for weight in self.parameters():
-            stdv = 1.0 / math.sqrt(weight.size(0))
-            torch.nn.init.uniform_(weight, -stdv, stdv)
+    def kaiming_init(self):
+        for param in self.parameters():
+            std = math.sqrt(2 / param.size(0))
+            torch.nn.init.normal_(param, mean=0, std=std)
 
     def forward(self, x):
         x = self.encoder(x)

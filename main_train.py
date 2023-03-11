@@ -1,20 +1,21 @@
 import os
+
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
 
 from dataloader import DicomDataset
-from model import VAE
 from loss import KLDivergence, L2Loss
-from train import train_loop, val_loop, test_loop
-from save_load import save_checkpoint, load_from_checkpoint
+from model import VAE
 from plotting import plot_and_save_loss
+from save_load import save_checkpoint, load_from_checkpoint
+from train import train_loop, val_loop
 
 # Hyper parameters:
 batch_size = 64
 learning_rate = 0.001
-max_epochs = 300
+max_epochs = 500
 weight_decay = 5e-7
 train_val_test_split = [0.8, 0.1, 0.1]  # Proportion of data for training, validation, and testing. Sums to 1
 device = 'cuda'
@@ -49,9 +50,7 @@ val_dataloader = DataLoader(val_dataset,
                             batch_size=batch_size,
                             shuffle=True)
 
-test_dataloader = DataLoader(test_dataset,
-                             batch_size=batch_size,
-                             shuffle=True)
+
 
 # Initialize model and optimizer
 model = VAE()
@@ -105,8 +104,8 @@ for t in range(max_epochs):
     plot_and_save_loss(loss_dict=loss_dict,
                        save_dir=save_dir)
 
-    # Save a checkpoint every 5 epochs
-    if t % 5 == 0:
+    # Save a checkpoint every 10 epochs
+    if t % 10 == 0:
         save_checkpoint(save_path=save_dir + "epoch_" + str(t) + ".tar",
                         model=model,
                         optimizer=optimizer,
@@ -128,13 +127,3 @@ for t in range(max_epochs):
 print("Done training.")
 print("Best epoch was: " + str(best_val_epoch))
 
-# Load the best model and run inference on the test set
-model_test = VAE()
-model_test.to(device=device)
-model_test, _ = load_from_checkpoint(checkpoint_path=save_dir + "best_epoch.tar")
-
-test_loop(dataloader=test_dataloader,
-          model=model_test,
-          loss_fn_kl=KLDivergence(),
-          loss_fn_recon=L2Loss(),
-          plot_save_dir=save_dir + "test/")

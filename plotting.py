@@ -66,6 +66,6 @@ def plot_and_save_loss(loss_dict, save_dir):
     ax.set_ylabel("KL Loss")
     ax2.set_ylabel("Recon Loss")
     fig.legend(["KL loss (train)", "KL loss (val)", "Recon loss (train)", "Recon loss (val)"],
-               bbox_to_anchor=(0.9, 0.9))
+               bbox_to_anchor=(0.9, 0.85))
     plt.savefig(save_dir + "loss.png", dpi=150)
     plt.close(fig)
