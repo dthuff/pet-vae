@@ -1,6 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torchviz import make_dot
 
 
 def plot_examples(X, y_pred, plot_path):
@@ -12,12 +14,12 @@ def plot_examples(X, y_pred, plot_path):
         plot_path (string) : path to folder to save images
 
     Returns:
-
-    TODO:L behavior at end of dataloader. Crashes if <32 slices left
+        None
     """
     # Limit plot to 32 slices -
-    X = X[:32, :, :, :]
-    y_pred = y_pred[:32, :, :, :]
+    if X.shape[0] > 32:
+        X = X[:32, :, :, :]
+        y_pred = y_pred[:32, :, :, :]
 
     # Plot input slices X and predicted slices y_pred
     fig, axs = plt.subplots(nrows=int(X.shape[0] / 4),
@@ -26,8 +28,10 @@ def plot_examples(X, y_pred, plot_path):
     axs = axs.flatten()
 
     for i, (img, recon_img) in enumerate(zip(X, y_pred)):
-        axs[2 * i].imshow(np.squeeze(np.asarray(img)), cmap='inferno')
-        axs[(2 * i) + 1].imshow(np.squeeze(np.asarray(recon_img)), cmap='inferno')
+        img = img.cpu().detach().squeeze().numpy()
+        recon_img = recon_img.cpu().detach().squeeze().numpy()
+        axs[2 * i].imshow(img, cmap='inferno', vmin=0, vmax=img.max())
+        axs[(2 * i) + 1].imshow(recon_img, cmap='inferno', vmin=0, vmax=img.max())
 
     # Hide axes and whitespace
     for a in axs:
@@ -64,9 +68,21 @@ def plot_and_save_loss(loss_dict, save_dir):
     ax2.plot(loss_dict["TRAIN_LOSS_RECON"], c='red')
     ax2.plot(loss_dict["VAL_LOSS_RECON"], c='lightcoral')
 
+    ax.set_yscale("log")
+    ax2.set_yscale("log")
     ax.set_ylabel("KL Loss")
     ax2.set_ylabel("Recon Loss")
+    ax.set_xlabel("Epoch")
     fig.legend(["KL loss (train)", "KL loss (val)", "Recon loss (train)", "Recon loss (val)"],
                bbox_to_anchor=(0.9, 0.85))
     plt.savefig(save_dir + "loss.png", dpi=150)
     plt.close(fig)
+
+
+def plot_model_architecture(model, batch_size, save_dir):
+    # Dummy tensor for batch size 16, 1 channel, image size 128 x 128.
+    x = torch.randn(batch_size, 1, 128, 128)
+    x = x.to(device="cuda")
+    y = model(x)
+
+    make_dot(y, params=dict(model.named_parameters())).render(save_dir + "vae.png")

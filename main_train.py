@@ -8,12 +8,14 @@ from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
 from dataloader import DicomDataset
 from loss import KLDivergence, L2Loss
 from model import VAE
-from plotting import plot_and_save_loss
+from plotting import plot_and_save_loss, plot_model_architecture
 from save_load import save_checkpoint, load_from_checkpoint
 from train import train_loop, val_loop
 
 # Hyper parameters:
 batch_size = 64
+img_dim = 128
+latent_dim = 256
 learning_rate = 0.001
 max_epochs = 500
 weight_decay = 5e-7
@@ -22,6 +24,7 @@ device = 'cuda'
 resume = False  # Resume training from best_epoch.tar?
 use_amp = False  # Use automatic mixed precision?
 
+# Paths
 data_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
 save_dir = './saved_models/'
 if not os.path.exists(save_dir):
@@ -30,7 +33,7 @@ if not os.path.exists(save_dir):
 # Transforms
 transform_composition = Compose([
     ToTensor(),
-    Resize(128),
+    Resize(img_dim),
     ConvertImageDtype(torch.float)
 ])
 
@@ -43,17 +46,21 @@ train_dataset, val_dataset, test_dataset = random_split(dataset,
                                                         train_val_test_split,
                                                         torch.Generator().manual_seed(91722))
 
-train_dataloader = DataLoader(train_dataset,
+train_dataloader = DataLoader(dataset=train_dataset,
                               batch_size=batch_size,
                               shuffle=True)
 
-val_dataloader = DataLoader(val_dataset,
+val_dataloader = DataLoader(dataset=dataset,
                             batch_size=batch_size,
                             shuffle=True)
 
 # Initialize model and optimizer
-model = VAE()
+model = VAE(latent_dim=latent_dim)
 model.to(device=device)
+plot_model_architecture(model=model,
+                        batch_size=batch_size,
+                        save_dir=save_dir)
+
 optimizer = torch.optim.Adam(model.parameters(),
                              lr=learning_rate,
                              weight_decay=weight_decay)
@@ -105,7 +112,7 @@ for t in range(max_epochs):
 
     # Save a checkpoint every 10 epochs
     if t % 10 == 0:
-        save_checkpoint(save_path=save_dir + "epoch_" + str(t) + ".tar",
+        save_checkpoint(save_path=save_dir + "epoch_" + str(t) + ".pth",
                         model=model,
                         optimizer=optimizer,
                         loss_kl=val_loss_kl,
@@ -116,7 +123,7 @@ for t in range(max_epochs):
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         best_val_epoch = t
-        save_checkpoint(save_path=save_dir + "best_epoch.tar",
+        save_checkpoint(save_path=save_dir + "best_epoch.pth",
                         model=model,
                         optimizer=optimizer,
                         loss_kl=val_loss_kl,

@@ -53,7 +53,7 @@ model_test, _ = load_from_checkpoint(checkpoint_path=save_dir + "best_epoch.tar"
                                      model=model_test,
                                      optimizer=optimizer)
 
-test_loss_kl, test_loss_recon = test_loop(dataloader=val_dataloader,
+test_loss_kl, test_loss_recon = test_loop(dataloader=test_dataloader,
                                           model=model_test,
                                           loss_fn_kl=KLDivergence(),
                                           loss_fn_recon=L2Loss(),
