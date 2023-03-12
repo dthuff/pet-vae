@@ -5,6 +5,7 @@ from plotting import plot_examples
 
 scaler = torch.cuda.amp.GradScaler()
 
+
 def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
     """TRAIN_LOOP - Runs training for one epoch
     
@@ -37,7 +38,7 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
             y_pred, z_mean, z_log_sigma = model(X)
             batch_loss_kl = loss_fn_kl(z_mean, z_log_sigma)
             batch_loss_recon = loss_fn_recon(y_pred, y)
-            batch_loss = batch_loss_kl + batch_loss_recon  # Consider weights here. IDK which loss is gonna dominate
+            batch_loss = 0.01 * batch_loss_kl + batch_loss_recon  # Consider weights here. IDK which loss is gonna dominate
 
         # Backpropagation - with GradScaler for optional automatic mixed precision
         scaler.scale(batch_loss).backward()
@@ -73,6 +74,9 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, epoch_number):
         loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
         epoch_number (int): epoch counter for saving plots
     """
+    # Stop training during validation
+    model.eval()
+
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_kl, loss_recon = 0, 0
@@ -116,12 +120,15 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
     Returns:
 
     """
+    # Do not train model at test time
+    model.eval()
+
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_kl, loss_recon = 0, 0
-    psnr = [] # A list of per-batch PSNR values
-    ssim = [] # A list of per-image SSIM values
-    ssim_norm = [] # A list of per-image SSIM values computed on normalized images
+    psnr = []  # A list of per-batch PSNR values
+    ssim = []  # A list of per-image SSIM values
+    ssim_norm = []  # A list of per-image SSIM values computed on normalized images
 
     with torch.no_grad():
         for batch, (X, y) in enumerate(dataloader):
@@ -139,10 +146,10 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
                           y_pred=y_pred.cpu(),
                           plot_path=plot_save_dir + "test_examples_batch_" + str(batch) + ".png")
 
-            psnr = psnr.append(calculate_psnr(y, y_pred))
+            psnr.append(calculate_psnr(y, y_pred))
             s, s_norm = calculate_ssim(y, y_pred)
-            ssim = ssim.extend(s)
-            ssim_norm = ssim_norm.extend(s_norm)
+            ssim.append(s)
+            ssim_norm.append(s_norm)
 
     loss_kl /= num_batches
     loss_recon /= num_batches

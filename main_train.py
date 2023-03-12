@@ -20,6 +20,7 @@ weight_decay = 5e-7
 train_val_test_split = [0.8, 0.1, 0.1]  # Proportion of data for training, validation, and testing. Sums to 1
 device = 'cuda'
 resume = False  # Resume training from best_epoch.tar?
+use_amp = False  # Use automatic mixed precision?
 
 data_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
 save_dir = './saved_models/'
@@ -49,8 +50,6 @@ train_dataloader = DataLoader(train_dataset,
 val_dataloader = DataLoader(val_dataset,
                             batch_size=batch_size,
                             shuffle=True)
-
-
 
 # Initialize model and optimizer
 model = VAE()
@@ -83,7 +82,7 @@ for t in range(max_epochs):
                                                  loss_fn_kl=KLDivergence(),
                                                  loss_fn_recon=L2Loss(),
                                                  optimizer=optimizer,
-                                                 amp_on=False)
+                                                 amp_on=use_amp)
 
     val_loss_kl, val_loss_recon = val_loop(dataloader=val_dataloader,
                                            model=model,

@@ -13,6 +13,7 @@ def plot_examples(X, y_pred, plot_path):
 
     Returns:
 
+    TODO:L behavior at end of dataloader. Crashes if <32 slices left
     """
     # Limit plot to 32 slices -
     X = X[:32, :, :, :]

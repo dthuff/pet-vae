@@ -24,7 +24,7 @@ class L2Loss(nn.Module):
         super(L2Loss, self).__init__()
 
     def forward(self, x, y):
-        return ((x - y) ** 2).mean()
+        return ((x - y) ** 2).mean() # was .mean()
 
 
 class L1Loss(nn.Module):

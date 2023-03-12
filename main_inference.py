@@ -34,6 +34,10 @@ train_dataset, val_dataset, test_dataset = random_split(dataset,
                                                         train_val_test_split,
                                                         torch.Generator().manual_seed(91722))
 
+val_dataloader = DataLoader(val_dataset,
+                            batch_size=batch_size,
+                            shuffle=True)
+
 test_dataloader = DataLoader(test_dataset,
                              batch_size=batch_size,
                              shuffle=True)
@@ -49,7 +53,7 @@ model_test, _ = load_from_checkpoint(checkpoint_path=save_dir + "best_epoch.tar"
                                      model=model_test,
                                      optimizer=optimizer)
 
-test_loss_kl, test_loss_recon = test_loop(dataloader=test_dataloader,
+test_loss_kl, test_loss_recon = test_loop(dataloader=val_dataloader,
                                           model=model_test,
                                           loss_fn_kl=KLDivergence(),
                                           loss_fn_recon=L2Loss(),

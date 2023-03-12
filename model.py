@@ -85,18 +85,6 @@ class Encoder(nn.Module):
         self.res_block4 = ResNetBlock(channels=256, kernel_size=3)
         self.MaxPool4 = nn.MaxPool2d(3, stride=2, padding=1)
 
-        self.kaiming_init()
-
-    def xavier_init(self):
-        for weight in self.parameters():
-            std_dev = 1.0 / math.sqrt(weight.size(0))
-            torch.nn.init.uniform_(weight, -std_dev, std_dev)
-
-    def kaiming_init(self):
-        for param in self.parameters():
-            std = math.sqrt(2 / param.size(0))
-            torch.nn.init.normal_(param, mean=0, std=std)
-
     def forward(self, x):
         x1 = self.conv1(x)
         x1 = self.res_block1(x1)
@@ -134,18 +122,6 @@ class Decoder(nn.Module):
         self.upsize1 = UpConvBlock(channels_in=32, channels_out=1, kernel_size=1, scale_factor=2)
         self.res_block1 = ResNetBlock(channels=1, kernel_size=3)
 
-        self.kaiming_init()
-
-    def xavier_init(self):
-        for param in self.parameters():
-            std_dev = 1.0 / math.sqrt(param.size(0))
-            torch.nn.init.uniform_(param, -std_dev, std_dev)
-
-    def kaiming_init(self):
-        for param in self.parameters():
-            std = math.sqrt(2 / param.size(0))
-            torch.nn.init.normal_(param, mean=0, std=std)
-
     def forward(self, x):
         x4_ = self.linear_up(x)
         x4_ = self.relu(x4_)
@@ -181,12 +157,17 @@ class VAE(nn.Module):
         self.encoder = Encoder()
         self.decoder = Decoder(latent_dim)
 
-        self.kaiming_init()
+        self.xavier_init()
 
     def kaiming_init(self):
         for param in self.parameters():
             std = math.sqrt(2 / param.size(0))
             torch.nn.init.normal_(param, mean=0, std=std)
+
+    def xavier_init(self):
+        for param in self.parameters():
+            std_dev = 1.0 / math.sqrt(param.size(0))
+            torch.nn.init.uniform_(param, -std_dev, std_dev)
 
     def forward(self, x):
         x = self.encoder(x)
