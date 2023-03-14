@@ -6,7 +6,7 @@ from plotting import plot_examples
 scaler = torch.cuda.amp.GradScaler()
 
 
-def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
+def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, optimizer, amp_on):
     """TRAIN_LOOP - Runs training for one epoch
     
     Args:
@@ -36,9 +36,9 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
         # Compute prediction and loss
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=amp_on):
             y_pred, z_mean, z_log_sigma = model(X)
-            batch_loss_kl = loss_fn_kl(z_mean, z_log_sigma)
+            batch_loss_kl = beta * loss_fn_kl(z_mean, z_log_sigma)
             batch_loss_recon = loss_fn_recon(y_pred, y)
-            batch_loss = 0.01 * batch_loss_kl + batch_loss_recon  # Consider weights here. IDK which loss is gonna dominate
+            batch_loss = batch_loss_kl + batch_loss_recon  # Consider weights here. IDK which loss is gonna dominate
 
         # Backpropagation - with GradScaler for optional automatic mixed precision
         scaler.scale(batch_loss).backward()
@@ -57,14 +57,14 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, optimizer, amp_on):
             print(f"    KL loss:   {batch_loss_kl.item():>20.2f}")
             print(f"    Recon loss:{batch_loss_recon.item():>20.2f}")
 
-        # Return the mean kl and recon loss
+        # Return the mean per-batch kl and recon loss
         mean_loss_kl = total_loss_kl / num_batches
         mean_loss_recon = total_loss_recon / num_batches
 
     return mean_loss_kl, mean_loss_recon
 
 
-def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, epoch_number):
+def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number):
     """VAL_LOOP - Runs validation for one epoch
 
     Args:
@@ -90,7 +90,7 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, epoch_number):
 
             # Compute prediction and loss
             y_pred, z_mean, z_log_sigma = model(X)
-            loss_kl += loss_fn_kl(z_mean, z_log_sigma).item()
+            loss_kl += beta * loss_fn_kl(z_mean, z_log_sigma).item()
             loss_recon += loss_fn_recon(y_pred, y).item()
 
             # Plot a montage of X and y_pred comparisons for the first batch
@@ -111,8 +111,10 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
     """
 
     Args:
-        dataloader:
-        model:
+        dataloader : DataLoader
+            Loader for test dataset
+        model : nn.Module
+            Model for testing
         loss_fn_kl:
         loss_fn_recon:
         plot_save_dir:

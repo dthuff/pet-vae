@@ -12,16 +12,23 @@ from train import test_loop
 data_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
 save_dir = './saved_models/'
 
-train_val_test_split = [0.8, 0.1, 0.1]  # Proportion of data for training, validation, and testing. Sums to 1
-device = 'cuda'
+# Hyper parameters:
 batch_size = 64
+channels = 1
+img_dim = 128  # Must be factor of 16 (base VAE has 4 maxpools in encoder)
+latent_dim = 256
 learning_rate = 0.001
 max_epochs = 500
 weight_decay = 5e-7
+train_val_test_split = [0.8, 0.1, 0.1]  # Proportion of data for training, validation, and testing. Sums to 1
+device = 'cuda'
+resume = False  # Resume training from best_epoch.tar?
+use_amp = False  # Use automatic mixed precision?
 
+# Transforms
 transform_composition = Compose([
     ToTensor(),
-    Resize(128),
+    Resize(img_dim),
     ConvertImageDtype(torch.float)
 ])
 
@@ -43,15 +50,18 @@ test_dataloader = DataLoader(test_dataset,
                              shuffle=True)
 
 # Load the best model and run inference on the test set
-model_test = VAE()
+model_test = VAE(latent_dim=latent_dim,
+                 img_dim=img_dim)
+
 model_test.to(device=device)
+
 optimizer = torch.optim.Adam(model_test.parameters(),
                              lr=learning_rate,
                              weight_decay=weight_decay)
 
-model_test, _ = load_from_checkpoint(checkpoint_path=save_dir + "best_epoch.tar",
-                                     model=model_test,
-                                     optimizer=optimizer)
+model_test, optimizer, loss_dict, epoch = load_from_checkpoint(checkpoint_path=save_dir + "best_epoch.pth",
+                                                               model=model_test,
+                                                               optimizer=optimizer)
 
 test_loss_kl, test_loss_recon = test_loop(dataloader=test_dataloader,
                                           model=model_test,

@@ -9,7 +9,7 @@ def plot_examples(X, y_pred, plot_path):
     """
 
     Args:
-        X (tensor) : model inputs
+        X (tensor) : model input
         y_pred (tensor) : model reconstruction
         plot_path (string) : path to folder to save images
 
@@ -79,9 +79,9 @@ def plot_and_save_loss(loss_dict, save_dir):
     plt.close(fig)
 
 
-def plot_model_architecture(model, batch_size, save_dir):
+def plot_model_architecture(model, batch_size, channels, img_dim, save_dir):
     # Dummy tensor for batch size 16, 1 channel, image size 128 x 128.
-    x = torch.randn(batch_size, 1, 128, 128)
+    x = torch.randn(batch_size, channels, img_dim, img_dim)
     x = x.to(device="cuda")
     y = model(x)
 

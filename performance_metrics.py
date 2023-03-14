@@ -42,11 +42,12 @@ def calculate_ssim(original, reconstruction):
     ssim_norm = np.zeros((original.shape[0],))
 
     for sl in range(original.shape[0]):
-        original_slice = np.squeeze(original[sl,:,:])
-        reconstruction_slice = np.squeeze(reconstruction[sl,:,:])
+        original_slice = np.squeeze(original[sl, :, :])
+        reconstruction_slice = np.squeeze(reconstruction[sl, :, :])
 
         original_slice_norm = (original_slice - np.mean(original_slice)) / np.std(original_slice)
-        reconstruction_slice_norm = (reconstruction_slice - np.mean(reconstruction_slice)) / np.std(reconstruction_slice)
+        reconstruction_slice_norm = (reconstruction_slice - np.mean(reconstruction_slice)) / np.std(
+            reconstruction_slice)
 
         ssim[sl] = structural_similarity(original_slice, reconstruction_slice)
         ssim_norm[sl] = structural_similarity(original_slice_norm, reconstruction_slice_norm)

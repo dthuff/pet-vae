@@ -67,7 +67,7 @@ class Encoder(nn.Module):
     So, at bottleneck layer, input spatial dims are reduced by factor of 2^4
     """
 
-    def __init__(self):
+    def __init__(self, latent_dim, img_dim):
         super(Encoder, self).__init__()
         self.conv1 = ConvBlock(channels_in=1, channels_out=32, kernel_size=3)
         self.res_block1 = ResNetBlock(channels=32, kernel_size=3)
@@ -101,24 +101,29 @@ class Encoder(nn.Module):
         x4 = self.conv4(x3)
         x4 = self.res_block4(x4)
         x4 = self.MaxPool4(x4)
-        return x4
+        return x4  # shape 256, img_dim/16, img_dim/16
 
 
 class Decoder(nn.Module):
     """
     Class for the decoder half of the VAE
     """
-    def __init__(self, latent_dim):
+    def __init__(self, latent_dim, img_dim):
         super(Decoder, self).__init__()
         self.latent_dim = latent_dim
-        self.linear_up = nn.Linear(latent_dim, 16384)  # 2nd arg is 256*8
+        self.img_dim = img_dim
+        self.linear_up = nn.Linear(latent_dim, int(256 * (img_dim / 16) ** 2))
         self.relu = nn.ReLU()
+
         self.upsize4 = UpConvBlock(channels_in=256, channels_out=128, kernel_size=1, scale_factor=2)
         self.res_block4 = ResNetBlock(channels=128, kernel_size=3)
+
         self.upsize3 = UpConvBlock(channels_in=128, channels_out=64, kernel_size=1, scale_factor=2)
         self.res_block3 = ResNetBlock(channels=64, kernel_size=3)
+
         self.upsize2 = UpConvBlock(channels_in=64, channels_out=32, kernel_size=1, scale_factor=2)
         self.res_block2 = ResNetBlock(channels=32, kernel_size=3)
+
         self.upsize1 = UpConvBlock(channels_in=32, channels_out=1, kernel_size=1, scale_factor=2)
         self.res_block1 = ResNetBlock(channels=1, kernel_size=3)
 
@@ -126,8 +131,7 @@ class Decoder(nn.Module):
         x4_ = self.linear_up(x)
         x4_ = self.relu(x4_)
 
-        # x4_ = x4_.view(-1, 256, 5, 6, 5)
-        x4_ = x4_.view(-1, 256, 8, 8)
+        x4_ = x4_.view(-1, 256, int(self.img_dim / 16), int(self.img_dim / 16))
         x4_ = self.upsize4(x4_)
         x4_ = self.res_block4(x4_)
 
@@ -147,15 +151,16 @@ class VAE(nn.Module):
     """
     Variational autoencoder consists of encoder + decoder
     """
-    def __init__(self, latent_dim=128):
+    def __init__(self, latent_dim=128, img_dim=128):
         super(VAE, self).__init__()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.latent_dim = latent_dim
-        self.z_mean = nn.Linear(16384, latent_dim)  # First arg was 256*150
-        self.z_log_sigma = nn.Linear(16384, latent_dim)
+        self.img_dim = img_dim
+        self.z_mean = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)   # 16 = 2**4 - total downsample in encoder
+        self.z_log_sigma = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)
         self.epsilon = torch.normal(size=(1, latent_dim), mean=0, std=1.0, device=self.device)
-        self.encoder = Encoder()
-        self.decoder = Decoder(latent_dim)
+        self.encoder = Encoder(latent_dim, img_dim)
+        self.decoder = Decoder(latent_dim, img_dim)
 
         self.xavier_init()
 
