@@ -94,10 +94,10 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number):
             loss_recon += loss_fn_recon(y_pred, y).item()
 
             # Plot a montage of X and y_pred comparisons for the first batch
-            if not plotted_this_epoch:
+            if epoch_number % 10 == 0 and not plotted_this_epoch:
                 plot_examples(X=X.cpu(),
                               y_pred=y_pred.cpu(),
-                              plot_path="./saved_models/validation_images_epoch_" + str(epoch_number) + ".png")
+                              plot_path="./saved_models/validation_images/epoch_" + str(epoch_number) + ".png")
                 plotted_this_epoch = True
 
             # TODO - plots N(0,1) against N(z_mean, z_log_sigma)

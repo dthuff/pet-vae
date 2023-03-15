@@ -118,9 +118,8 @@ for t in range(start_epoch, max_epochs):
     loss_dict["VAL_LOSS_KL"].append(val_loss_kl)
     loss_dict["VAL_LOSS_RECON"].append(val_loss_recon)
 
-    if t % 10 == 0:
-        plot_and_save_loss(loss_dict=loss_dict,
-                           save_dir=save_dir + "validation_images/")
+    plot_and_save_loss(loss_dict=loss_dict,
+                       save_dir=save_dir)
 
     # Save a checkpoint every 10 epochs
     if t % 50 == 0:
