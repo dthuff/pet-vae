@@ -111,16 +111,17 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
     """
 
     Args:
-        dataloader : DataLoader
-            Loader for test dataset
-        model : nn.Module
-            Model for testing
+        dataloader:
+        model:
         loss_fn_kl:
         loss_fn_recon:
         plot_save_dir:
 
     Returns:
-
+        loss_kl:
+        loss_recon:
+        perf_metric : dict
+            dictionary containing psnr and ssim per batch
     """
     # Do not train model at test time
     model.eval()
@@ -155,5 +156,9 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
 
     loss_kl /= num_batches
     loss_recon /= num_batches
+    perf_metrics = dict()
+    perf_metrics["ssim"] = ssim
+    perf_metrics["ssim_norm"] = ssim_norm
+    perf_metrics["psnr"] = psnr
 
-    return loss_kl, loss_recon
+    return loss_kl, loss_recon, perf_metrics

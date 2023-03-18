@@ -47,7 +47,8 @@ val_dataloader = DataLoader(val_dataset,
 
 test_dataloader = DataLoader(test_dataset,
                              batch_size=batch_size,
-                             shuffle=True)
+                             shuffle=True,
+                             drop_last=True)
 
 # Load the best model and run inference on the test set
 model_test = VAE(latent_dim=latent_dim,
@@ -63,8 +64,11 @@ model_test, optimizer, loss_dict, epoch = load_from_checkpoint(checkpoint_path=s
                                                                model=model_test,
                                                                optimizer=optimizer)
 
-test_loss_kl, test_loss_recon = test_loop(dataloader=test_dataloader,
-                                          model=model_test,
-                                          loss_fn_kl=KLDivergence(),
-                                          loss_fn_recon=L2Loss(),
-                                          plot_save_dir=save_dir + "test/")
+test_loss_kl, test_loss_recon, perf_metrics = test_loop(dataloader=test_dataloader,
+                                                        model=model_test,
+                                                        loss_fn_kl=KLDivergence(),
+                                                        loss_fn_recon=L2Loss(),
+                                                        plot_save_dir=save_dir + "test/")
+
+# Plot PSNR and SSIM boxplots
+a=5
