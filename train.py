@@ -150,15 +150,13 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
                           plot_path=plot_save_dir + "test_examples_batch_" + str(batch) + ".png")
 
             psnr.append(calculate_psnr(y, y_pred))
-            s, s_norm = calculate_ssim(y, y_pred)
-            ssim.append(s)
-            ssim_norm.append(s_norm)
+            ssim.append(calculate_ssim(y, y_pred))
 
     loss_kl /= num_batches
     loss_recon /= num_batches
+
     perf_metrics = dict()
     perf_metrics["ssim"] = ssim
-    perf_metrics["ssim_norm"] = ssim_norm
     perf_metrics["psnr"] = psnr
 
     return loss_kl, loss_recon, perf_metrics

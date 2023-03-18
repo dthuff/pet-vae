@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
@@ -20,7 +21,7 @@ latent_dim = 256
 learning_rate = 0.001
 max_epochs = 500
 weight_decay = 5e-7
-train_val_test_split = [0.8, 0.1, 0.1]  # Proportion of data for training, validation, and testing. Sums to 1
+train_val_test_split = [0.8, 0.19, 0.01]  # Proportion of data for training, validation, and testing. Sums to 1
 device = 'cuda'
 resume = False  # Resume training from best_epoch.tar?
 use_amp = False  # Use automatic mixed precision?
@@ -71,4 +72,11 @@ test_loss_kl, test_loss_recon, perf_metrics = test_loop(dataloader=test_dataload
                                                         plot_save_dir=save_dir + "test/")
 
 # Plot PSNR and SSIM boxplots
-a=5
+flat_ssim = [item for sublist in perf_metrics["ssim"] for item in sublist]
+flat_psnr = [item for sublist in perf_metrics["psnr"] for item in sublist]
+
+fig, axs = plt.subplots(1, 2, figsize=(8,6))
+axs[0].hist(flat_ssim)
+
+axs[1].hist(flat_psnr)
+plt.show()
