@@ -64,43 +64,43 @@ class Encoder(nn.Module):
     Class for the Encoder (1st half of the VAE)
     4 blocks of conv, resnet, maxpool
 
-    So, at bottleneck layer, input spatial dims are reduced by factor of 2^4
+    So, at bottleneck layer, input spatial dims are reduced by factor of 2^4 = 16
     """
 
     def __init__(self, latent_dim, img_dim):
         super(Encoder, self).__init__()
         self.conv1 = ConvBlock(channels_in=1, channels_out=32, kernel_size=3)
         self.res_block1 = ResNetBlock(channels=32, kernel_size=3)
-        self.MaxPool1 = nn.MaxPool2d(3, stride=2, padding=1)
+        self.max_pool1 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.conv2 = ConvBlock(channels_in=32, channels_out=64, kernel_size=3)
         self.res_block2 = ResNetBlock(channels=64, kernel_size=3)
-        self.MaxPool2 = nn.MaxPool2d(3, stride=2, padding=1)
+        self.max_pool2 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.conv3 = ConvBlock(channels_in=64, channels_out=128, kernel_size=3)
         self.res_block3 = ResNetBlock(channels=128, kernel_size=3)
-        self.MaxPool3 = nn.MaxPool2d(3, stride=2, padding=1)
+        self.max_pool3 = nn.MaxPool2d(3, stride=2, padding=1)
 
         self.conv4 = ConvBlock(channels_in=128, channels_out=256, kernel_size=3)
         self.res_block4 = ResNetBlock(channels=256, kernel_size=3)
-        self.MaxPool4 = nn.MaxPool2d(3, stride=2, padding=1)
+        self.max_pool4 = nn.MaxPool2d(3, stride=2, padding=1)
 
     def forward(self, x):
         x1 = self.conv1(x)
         x1 = self.res_block1(x1)
-        x1 = self.MaxPool1(x1)
+        x1 = self.max_pool1(x1)
 
         x2 = self.conv2(x1)
         x2 = self.res_block2(x2)
-        x2 = self.MaxPool2(x2)
+        x2 = self.max_pool2(x2)
 
         x3 = self.conv3(x2)
         x3 = self.res_block3(x3)
-        x3 = self.MaxPool3(x3)
+        x3 = self.max_pool3(x3)
 
         x4 = self.conv4(x3)
         x4 = self.res_block4(x4)
-        x4 = self.MaxPool4(x4)
+        x4 = self.max_pool4(x4)
         return x4  # shape 256, img_dim/16, img_dim/16
 
 

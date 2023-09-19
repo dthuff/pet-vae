@@ -18,13 +18,13 @@ class KLDivergence(nn.Module):
 
 class L2Loss(nn.Module):
     """
-    L2 reconstruction loss"
+    L2 reconstruction loss
     """
     def __init__(self):
         super(L2Loss, self).__init__()
 
     def forward(self, x, y):
-        return ((x - y) ** 2).mean() # was .mean()
+        return ((x - y) ** 2).mean()  # was .mean()
 
 
 class L1Loss(nn.Module):
