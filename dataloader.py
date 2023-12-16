@@ -1,8 +1,17 @@
 import os
 from glob import glob
 
+import torch
 from pydicom import dcmread
 from torch.utils.data import Dataset
+from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
+
+
+def image_transform(config: dict):
+    return Compose([ToTensor(),
+                    Resize(config['model']['img_dim']),
+                    ConvertImageDtype(torch.float)
+                    ])
 
 
 class DicomDataset(Dataset):

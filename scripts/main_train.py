@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
 
-from dataloader import DicomDataset
+from dataloader import DicomDataset, image_transform
 from loss import KLDivergence, L2Loss
 from model import VAE
 from plotting import plot_and_save_loss, plot_model_architecture
@@ -29,11 +29,7 @@ if __name__ == "__main__":
         os.makedirs(config['logging']['model_save_dir'])
 
     # Transforms
-    transform_composition = Compose([
-        ToTensor(),
-        Resize(config['model']['img_dim']),
-        ConvertImageDtype(torch.float)
-    ])
+    transform_composition = image_transform(config)
 
     # Dataset, splitting, and loaders
     dataset = DicomDataset(config['data']['data_dir'],
