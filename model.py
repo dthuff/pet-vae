@@ -2,9 +2,10 @@
 Architecture adapted from https://github.com/duyphuongcri/Variational-AutoEncoder
 """
 
+import math
+
 import torch
 import torch.nn as nn
-import math
 
 
 class ConvBlock(nn.Module):
@@ -108,6 +109,7 @@ class Decoder(nn.Module):
     """
     Class for the decoder half of the VAE
     """
+
     def __init__(self, latent_dim, img_dim):
         super(Decoder, self).__init__()
         self.latent_dim = latent_dim
@@ -151,12 +153,13 @@ class VAE(nn.Module):
     """
     Variational autoencoder consists of encoder + decoder
     """
+
     def __init__(self, latent_dim=128, img_dim=128):
         super(VAE, self).__init__()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.latent_dim = latent_dim
         self.img_dim = img_dim
-        self.z_mean = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)   # 16 = 2**4 - total downsample in encoder
+        self.z_mean = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)  # 16 = 2**4 - total downsample in encoder
         self.z_log_sigma = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)
         self.epsilon = torch.normal(size=(1, latent_dim), mean=0, std=1.0, device=self.device)
         self.encoder = Encoder(latent_dim, img_dim)

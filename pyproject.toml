@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "pet-vae"
+version = "0.1.0"
+description = "Variational autoencoder for reconstructing PET images."
+authors = ["Daniel <huffdanielt@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.1.2"
+torchvision = "^0.16.2"
+matplotlib = "^3.8.2"
+torchviz = "^0.0.2"
+pydicom = "^2.4.4"
+scikit-image = "^0.22.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

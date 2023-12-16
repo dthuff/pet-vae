@@ -11,7 +11,7 @@ from save_load import load_from_checkpoint
 from train import test_loop
 
 data_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
-save_dir = './saved_models/'
+save_dir = '../saved_models/'
 
 # Hyper parameters:
 batch_size = 64
@@ -75,7 +75,7 @@ test_loss_kl, test_loss_recon, perf_metrics = test_loop(dataloader=test_dataload
 flat_ssim = [item for sublist in perf_metrics["ssim"] for item in sublist]
 flat_psnr = [item for sublist in perf_metrics["psnr"] for item in sublist]
 
-fig, axs = plt.subplots(1, 2, figsize=(8,6))
+fig, axs = plt.subplots(1, 2, figsize=(8, 6))
 axs[0].hist(flat_ssim)
 
 axs[1].hist(flat_psnr)

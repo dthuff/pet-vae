@@ -18,14 +18,6 @@ for patient in os.listdir(data_dir):
     for timepoint in os.listdir(patient_dir):
         timepoint_dir = patient_dir + timepoint + '/'
 
-        # For each study we need to identify ONE PET folder and ONE CT folder.
-        # We're gonna do this based on string matching and counting dicoms
-        # We want the CT dicom count to match exactly the PET dicom count
-        # We want the PET folder to not be the uncorrected (No AC) PET dicoms
-
-        # Because I have limited hard drive space, im also going to delete unneeded dcm
-        # as i go. This is kinda risky, but I can redownload the dataset from TCIA if
-        # I screw up
         candidate_pet_paths = []
         candidate_ct_paths = []
 
@@ -45,17 +37,12 @@ for patient in os.listdir(data_dir):
                 for f in os.listdir(series_dir):
                     os.remove(os.path.join(series_dir, f))
 
-        # If we've found exactly 1 candidate dir for PET and CT, and they each
-        # contain the same number of dicoms, add 'em to the list of good directories
         if len(candidate_pet_paths) == 1 and \
                 len(candidate_ct_paths) == 1 and \
                 len(os.listdir(candidate_pet_paths[0])) == len(os.listdir(candidate_ct_paths[0])):
             good_ct_paths.append(candidate_ct_paths[0])
             good_pet_paths.append(candidate_pet_paths[0])
 
-# Using this approach, we get 152 matched PET and CT folders.
-# Thats good enough for now. If we end up needing more training data, I can come back and try to
-# increase our yield here.
 print("Found " + str(len(good_pet_paths)) + " useful PET directories.")
 print("Found " + str(len(good_ct_paths)) + " useful CT directories.")
 

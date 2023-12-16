@@ -20,6 +20,7 @@ class L2Loss(nn.Module):
     """
     L2 reconstruction loss
     """
+
     def __init__(self):
         super(L2Loss, self).__init__()
 
@@ -31,6 +32,7 @@ class L1Loss(nn.Module):
     """
     L1 reconstruction loss
     """
+
     def __init__(self):
         super(L1Loss, self).__init__()
 

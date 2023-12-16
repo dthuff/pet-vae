@@ -84,7 +84,6 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number):
 
     with torch.no_grad():
         for X, y in dataloader:
-            # Send the inputs X and labels y to the GPU
             X = X.cuda()
             y = y.cuda()
 

@@ -29,7 +29,7 @@ use_amp = False  # Use automatic mixed precision?
 
 # Paths
 data_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
-save_dir = './saved_models/'
+save_dir = '../saved_models/'
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
