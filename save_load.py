@@ -1,6 +1,26 @@
 import os
-
+import yaml
 import torch
+
+
+def load_config(path: str):
+    """
+    Parse the config and return as dict
+    Parameters
+    ----------
+    path: str
+        Path to config yml
+
+    Returns
+    -------
+    Nested dict containing config fields.
+    """
+    with open(path, "r") as cfg:
+        try:
+            ll = yaml.safe_load(cfg)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return ll
 
 
 def save_checkpoint(save_path, model, optimizer, loss_dict, epoch_number):
