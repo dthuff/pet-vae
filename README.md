@@ -1,13 +1,32 @@
 # pet-vae
 2D variational autoencoder for reconstructing PET images implemented in pytorch
 
-Trained using data from ACRIN-NSCLC-FDG-PET hosted by The Cancer Imaging Archive. Data available from: https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=39879162
+Trained using data from [ACRIN-NSCLC-FDG-PET](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=39879162) hosted by The Cancer Imaging Archive.
 
 Converges in ~3-5 hours training on a NVIDIA 1080 (8 GB).
 
-Figure 1: randomly selected example axial PET slices from the validation set after 540 epochs. Odd columns are model input, even columns are model reconstructions.
-![alt text](https://github.com/dthuff/pet-vae/blob/master/saved_models/validation_images/epoch_540.png?raw=true)
+# Installation
 
+Clone the repository
 
-Figure 2: Loss curve for the VAE. Total loss was the sum of Kullback-Liebler (KL) and reconstruction L2 (RECON) losses.
-![alt text](https://github.com/dthuff/pet-vae/blob/master/saved_models/loss.png?raw=true)
+    git clone https://github.com/dthuff/pet-vae.git
+
+Install dependencies with [Poetry](https://python-poetry.org/):
+
+    cd pet-vae
+    poetry install --no-root
+
+# Usage
+
+Run training and inference using scripts in `scripts/`:
+    
+Training:
+
+    poetry run python main_training.py --config /path/to/my/training_config.yml
+
+Inference (requires that you point to a saved `.pth` in config:
+
+    poetry run python main_inference.py --config /path/to/my/test_config.yml
+
+Example config is provided: `configs/train_config.yml`
+
