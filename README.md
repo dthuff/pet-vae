@@ -18,13 +18,13 @@ Install dependencies with [Poetry](https://python-poetry.org/):
 
 # Usage
 
-Run training and inference using scripts in `scripts/`:
+Run training and inference via:
     
 Training:
 
     poetry run python main_training.py --config /path/to/my/training_config.yml
 
-Inference (requires that you point to a saved `.pth` in config:
+Inference: (requires that you point to a saved model `.pth` in config
 
     poetry run python main_inference.py --config /path/to/my/test_config.yml
 

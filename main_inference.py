@@ -9,7 +9,7 @@ from dataloader import DicomDataset, image_transform
 from loss import KLDivergence, L2Loss
 from model import VAE
 from save_load import load_from_checkpoint, load_config, create_output_directories
-from scripts.main_train import parse_cl_args
+from main_train import parse_cl_args
 from train import test_loop
 
 if __name__ == "__main__":

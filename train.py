@@ -39,9 +39,9 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, optimizer, am
 
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=amp_on):
             y_pred, z_mean, z_log_sigma = model(X)
-            batch_loss_kl = loss_fn_kl(z_mean, z_log_sigma)
+            batch_loss_kl = beta * loss_fn_kl(z_mean, z_log_sigma)
             batch_loss_recon = loss_fn_recon(y_pred, y)
-            batch_loss = batch_loss_recon + beta * batch_loss_kl
+            batch_loss = batch_loss_recon + batch_loss_kl
 
         # Backpropagation with GradScaler for optional automatic mixed precision
         scaler.scale(batch_loss).backward()
