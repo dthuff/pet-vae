@@ -9,7 +9,7 @@ from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
 
 def image_transform(config: dict):
     return Compose([ToTensor(),
-                    Resize(config['model']['img_dim']),
+                    Resize(config['model']['img_dim'], antialias=True),
                     ConvertImageDtype(torch.float)
                     ])
 

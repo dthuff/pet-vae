@@ -16,7 +16,7 @@ def plot_examples(X, y_pred, plot_path):
     Returns:
         None
     """
-    # Limit plot to 32 slices -
+    # Limit plot to 32 slices
     if X.shape[0] > 32:
         X = X[:32, :, :, :]
         y_pred = y_pred[:32, :, :, :]
@@ -33,21 +33,18 @@ def plot_examples(X, y_pred, plot_path):
         axs[2 * i].imshow(img, cmap='inferno', vmin=0, vmax=img.max())
         axs[(2 * i) + 1].imshow(recon_img, cmap='inferno', vmin=0, vmax=img.max())
 
-    # Hide axes and whitespace
     for a in axs:
         a.set_xticklabels([])
         a.set_yticklabels([])
         a.axis('off')
     plt.subplots_adjust(wspace=0, hspace=0, left=0, right=1, bottom=0, top=1)
 
-    # Create the save_dir if it does not exist
     save_dir, _ = os.path.split(plot_path)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     plt.savefig(plot_path, dpi=150)
     plt.close(fig)
-    print("Saved example image to: " + plot_path)
 
 
 def plot_and_save_loss(loss_dict, save_dir):
@@ -75,14 +72,13 @@ def plot_and_save_loss(loss_dict, save_dir):
     ax.set_xlabel("Epoch")
     fig.legend(["KL loss (train)", "KL loss (val)", "Recon loss (train)", "Recon loss (val)"],
                bbox_to_anchor=(0.9, 0.85))
-    plt.savefig(save_dir + "loss.png", dpi=150)
+    plt.savefig(os.path.join(save_dir, "loss.png"), dpi=150)
     plt.close(fig)
 
 
 def plot_model_architecture(model, batch_size, channels, img_dim, save_dir):
-    # Dummy tensor for batch size 16, 1 channel, image size 128 x 128.
     x = torch.randn(batch_size, channels, img_dim, img_dim)
     x = x.to(device="cuda")
     y = model(x)
 
-    make_dot(y, params=dict(model.named_parameters())).render(save_dir + "vae.png")
+    make_dot(y, params=dict(model.named_parameters())).render(os.path.join(save_dir, "model.png"))

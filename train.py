@@ -52,7 +52,7 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, optimizer, am
         total_loss_kl += batch_loss_kl.item()
         total_loss_recon += batch_loss_recon.item()
 
-        if batch % 10 == 0:
+        if batch % round(0.2 * num_batches) == 0:
             loss, current = batch_loss.item(), batch * len(X)
             print(f"Total loss: {loss:.2f}  [{current:>2d}/{size:>2d}]")
             print(f"    KL loss:   {batch_loss_kl.item():>20.2f}")
@@ -61,7 +61,7 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, optimizer, am
     return total_loss_kl / num_batches, total_loss_recon / num_batches
 
 
-def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number):
+def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number, plot_save_dir):
     """VAL_LOOP - Runs validation for one epoch
 
     Args:
@@ -71,11 +71,11 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number):
         loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
         beta: (float): Weight for KL loss term
         epoch_number (int): epoch counter for saving plots
+        plot_save_dir (str): folder to save example images to
     """
     # Stop training during validation
     model.eval()
 
-    size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_kl, loss_recon = 0, 0
     plotted_this_epoch = False
@@ -94,7 +94,7 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number):
             if epoch_number % 10 == 0 and not plotted_this_epoch:
                 plot_examples(X=X.cpu(),
                               y_pred=y_pred.cpu(),
-                              plot_path="./saved_models/validation_images/epoch_" + str(epoch_number) + ".png")
+                              plot_path=os.path.join(plot_save_dir, f"val_epoch_{epoch_number}.png"))
                 plotted_this_epoch = True
 
             # TODO - plots N(0,1) against N(z_mean, z_log_sigma)
@@ -123,12 +123,10 @@ def test_loop(dataloader, model, loss_fn_kl, loss_fn_recon, plot_save_dir):
     # Do not train model at test time
     model.eval()
 
-    size = len(dataloader.dataset)
     num_batches = len(dataloader)
     loss_kl, loss_recon = 0, 0
     psnr = []  # A list of per-batch PSNR values
     ssim = []  # A list of per-image SSIM values
-    ssim_norm = []  # A list of per-image SSIM values computed on normalized images
 
     with torch.no_grad():
         for batch, (X, y) in enumerate(dataloader):

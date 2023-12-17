@@ -24,7 +24,7 @@ def load_config(path: str):
 
 
 def save_checkpoint(save_path, model, optimizer, loss_dict, epoch_number):
-    """SAVE_CHECKPOINT - save a model checkpoint as .tar
+    """SAVE_CHECKPOINT - save a model checkpoint as .pth
 
     Args:
         save_path (string): full path to .tar to be saved
@@ -33,18 +33,15 @@ def save_checkpoint(save_path, model, optimizer, loss_dict, epoch_number):
         loss_dict (dict): contains loss history train and val, recon and kl
         epoch_number (int): epoch index to label file. Also saved in checkpoint dict
     """
-    # Create a save directory if it does not yet exist
     save_dir, _ = os.path.split(save_path)
-    if not os.path.exists(save_dir): os.makedirs(save_dir)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
 
-    # Write the model to a dictionary
     checkpoint = {"model": model.state_dict(),
                   "optimizer": optimizer.state_dict(),
                   "loss_dict": loss_dict,
                   "epoch": epoch_number
                   }
-
-    # Save
     torch.save(checkpoint, save_path)
 
 
@@ -73,3 +70,9 @@ def load_from_checkpoint(checkpoint_path, model, optimizer):
     print("Resuming from epoch: " + str(checkpoint["epoch"]))
 
     return model, optimizer, loss_dict, epoch
+
+
+def create_output_directories(config):
+    for d in ['model_save_dir', 'plot_save_dir']:
+        if not os.path.exists(config['logging'][d]):
+            os.makedirs(config['logging'][d])

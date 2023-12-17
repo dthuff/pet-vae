@@ -8,7 +8,7 @@ from torch.utils.data import random_split
 from dataloader import DicomDataset, image_transform
 from loss import KLDivergence, L2Loss
 from model import VAE
-from save_load import load_from_checkpoint, load_config
+from save_load import load_from_checkpoint, load_config, create_output_directories
 from scripts.main_train import parse_cl_args
 from train import test_loop
 
@@ -16,8 +16,7 @@ if __name__ == "__main__":
     cl_args = parse_cl_args()
     config = load_config(cl_args.config)
 
-    if not os.path.exists(config['logging']['model_save_dir']):
-        os.makedirs(config['logging']['model_save_dir'])
+    create_output_directories(config)
 
     transform_composition = image_transform(config)
 

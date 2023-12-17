@@ -5,13 +5,12 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
-from torchvision.transforms import Compose, Resize, ToTensor, ConvertImageDtype
 
 from dataloader import DicomDataset, image_transform
 from loss import KLDivergence, L2Loss
 from model import VAE
 from plotting import plot_and_save_loss, plot_model_architecture
-from save_load import save_checkpoint, load_from_checkpoint, load_config
+from save_load import save_checkpoint, load_from_checkpoint, load_config, create_output_directories
 from train import train_loop, val_loop
 
 
@@ -25,30 +24,24 @@ if __name__ == "__main__":
     cl_args = parse_cl_args()
     config = load_config(cl_args.config)
 
-    if not os.path.exists(config['logging']['model_save_dir']):
-        os.makedirs(config['logging']['model_save_dir'])
+    create_output_directories(config)
 
-    # Transforms
     transform_composition = image_transform(config)
 
-    # Dataset, splitting, and loaders
+    # Datasets and loaders
     dataset = DicomDataset(config['data']['data_dir'],
                            transform=transform_composition,
                            target_transform=transform_composition)
-
     train_dataset, val_dataset, test_dataset = random_split(dataset,
                                                             config['data']['train_val_test_split'],
                                                             torch.Generator().manual_seed(91722))
-
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=config['model']['batch_size'],
                                   shuffle=True)
-
     val_dataloader = DataLoader(dataset=dataset,
                                 batch_size=config['model']['batch_size'],
                                 shuffle=True)
 
-    # Initialize model and optimizer
     model = VAE(latent_dim=config['model']['latent_dim'],
                 img_dim=config['model']['img_dim'])
     model.to(device=config['model']['device'])
@@ -79,12 +72,10 @@ if __name__ == "__main__":
         loss_dict = {"TRAIN_LOSS_KL": [],
                      "TRAIN_LOSS_RECON": [],
                      "VAL_LOSS_KL": [],
-                     "VAL_LOSS_RECON": []
-                     }
+                     "VAL_LOSS_RECON": []}
         best_val_loss = 1e12
         best_val_epoch = 0
 
-    # Training loop
     for t in range(start_epoch, config['model']['max_epochs']):
         print(f"Epoch {t}\n-------------------------------")
         train_loss_kl, train_loss_recon = train_loop(dataloader=train_dataloader,
@@ -100,23 +91,22 @@ if __name__ == "__main__":
                                                loss_fn_kl=KLDivergence(),
                                                loss_fn_recon=L2Loss(),
                                                beta=beta,
-                                               epoch_number=t)
+                                               epoch_number=t,
+                                               plot_save_dir=config['logging']['plot_save_dir'])
 
         val_loss = val_loss_kl + val_loss_recon
         print(f"Validation loss for epoch {t:>2d}:")
         print(f"    KL loss:   {val_loss_kl:>15.2f}")
         print(f"    Recon loss:{val_loss_recon:>15.2f}")
 
-        # Append losses for this epoch
         loss_dict["TRAIN_LOSS_KL"].append(train_loss_kl)
         loss_dict["TRAIN_LOSS_RECON"].append(train_loss_recon)
         loss_dict["VAL_LOSS_KL"].append(val_loss_kl)
         loss_dict["VAL_LOSS_RECON"].append(val_loss_recon)
 
         plot_and_save_loss(loss_dict=loss_dict,
-                           save_dir=config['logging']['model_save_dir'])
+                           save_dir=config['logging']['plot_save_dir'])
 
-        # Save a checkpoint every 10 epochs
         if t % config['logging']['save_model_every_n_epochs'] == 0:
             save_checkpoint(save_path=os.path.join(config['logging']['model_save_dir'], f"epoch_{t}.pth"),
                             model=model,
@@ -124,7 +114,6 @@ if __name__ == "__main__":
                             loss_dict=loss_dict,
                             epoch_number=t)
 
-        # If this epoch has the best validation loss, save it to "best_epoch.tar"
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_val_epoch = t
