@@ -40,7 +40,7 @@ if __name__ == "__main__":
                                   shuffle=True)
     val_dataloader = DataLoader(dataset=dataset,
                                 batch_size=config['model']['batch_size'],
-                                shuffle=True)
+                                shuffle=False)
 
     model = VAE(latent_dim=config['model']['latent_dim'],
                 img_dim=config['model']['img_dim'])
@@ -92,6 +92,7 @@ if __name__ == "__main__":
                                                loss_fn_recon=L2Loss(),
                                                beta=beta,
                                                epoch_number=t,
+                                               plot_every_n_epochs=config['logging']['plot_every_n_epochs'],
                                                plot_save_dir=config['logging']['plot_save_dir'])
 
         val_loss = val_loss_kl + val_loss_recon

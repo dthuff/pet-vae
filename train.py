@@ -61,7 +61,7 @@ def train_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, optimizer, am
     return total_loss_kl / num_batches, total_loss_recon / num_batches
 
 
-def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number, plot_save_dir):
+def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number, plot_every_n_epochs, plot_save_dir):
     """VAL_LOOP - Runs validation for one epoch
 
     Args:
@@ -71,6 +71,7 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number, p
         loss_fn_recon (nn.Module): Reconstruction loss - e.g. L1, L2 (mse)
         beta: (float): Weight for KL loss term
         epoch_number (int): epoch counter for saving plots
+        plot_every_n_epochs (int): frequency to plot example images
         plot_save_dir (str): folder to save example images to
     """
     # Stop training during validation
@@ -91,7 +92,7 @@ def val_loop(dataloader, model, loss_fn_kl, loss_fn_recon, beta, epoch_number, p
             loss_recon += loss_fn_recon(y_pred, y).item()
 
             # Plot a montage of X and y_pred comparisons for the first batch
-            if epoch_number % 10 == 0 and not plotted_this_epoch:
+            if epoch_number % plot_every_n_epochs == 0 and not plotted_this_epoch:
                 plot_examples(X=X.cpu(),
                               y_pred=y_pred.cpu(),
                               plot_path=os.path.join(plot_save_dir, f"val_epoch_{epoch_number}.png"))
