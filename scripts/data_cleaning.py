@@ -2,6 +2,7 @@ import os
 import shutil
 
 # Walk through ./data/ and find folders containing whole-body, attenuation corrected PET dicoms.
+# TODO: clean this up
 
 data_dir = '/home/daniel/datasets/manifest-1580838164030/ACRIN-NSCLC-FDG-PET/'
 out_dir = '/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/'
