@@ -939,6 +939,22 @@ files = [
 docs = ["matplotlib", "numpy", "numpydoc", "pillow", "sphinx", "sphinx-copybutton", "sphinx-gallery", "sphinx_rtd_theme", "sphinxcontrib-napoleon"]
 
 [[package]]
+name = "pygifsicle"
+version = "1.0.7"
+description = "Python package wrapping the gifsicle library for editing and optimizing gifs."
+optional = false
+python-versions = "*"
+files = [
+    {file = "pygifsicle-1.0.7.tar.gz", hash = "sha256:506ae0e4c76992a4fd6097da2d3f224a869ad504879fb1191d6af96c3d394ef8"},
+]
+
+[package.dependencies]
+support_developer = ">=1.0.5"
+
+[package.extras]
+test = ["pytest", "pytest-cov", "touch", "validate_version_code"]
+
+[[package]]
 name = "pyparsing"
 version = "3.1.1"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
@@ -1148,6 +1164,19 @@ files = [
 ]
 
 [[package]]
+name = "support-developer"
+version = "1.0.5"
+description = "Package designed to centralize messages to support developers development work."
+optional = false
+python-versions = "*"
+files = [
+    {file = "support_developer-1.0.5.tar.gz", hash = "sha256:7739f63766b90480ee71d56c70ed8953500c48ab19e2782f867786642fce03d9"},
+]
+
+[package.extras]
+test = ["codacy-coverage", "coveralls", "pytest", "pytest-cov", "validate_version_code"]
+
+[[package]]
 name = "sympy"
 version = "1.12"
 description = "Computer algebra system (CAS) in Python"
@@ -1338,4 +1367,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9762f908a3004d2875e6066f9b73de17f24218bcf27e5d2d96d221176f26c2b9"
+content-hash = "3af64377ba9d6fea1dc2e145060eb154f69912e52c9741625a97428f7b3bec54"
