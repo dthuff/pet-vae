@@ -2,7 +2,7 @@ model:
   batch_size: 64
   channels: 1
   img_dim: 128  # Must be a factor of 16 (base UNet has 4 max pools in encoder)
-  latent_dim: 128
+  latent_dim: 256
   learning_rate: 0.001
   max_epochs: 2000
   weight_decay: 5.e-7
