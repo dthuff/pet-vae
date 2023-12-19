@@ -14,8 +14,6 @@ torchviz = "^0.0.2"
 pydicom = "^2.4.4"
 scikit-image = "^0.22.0"
 pyyaml = "^6.0.1"
-imageio = "^2.33.1"
-pygifsicle = "^1.0.7"
 
 
 [build-system]
