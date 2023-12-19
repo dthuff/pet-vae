@@ -43,3 +43,7 @@ Example config is provided: `configs/train_config.yml`
 * Adjusting `beta` in `train.py`. `beta` controls the weight of the KL-loss relative to the Reconstruction loss. Check your loss.png to see which loss term is dominant and adjust `beta` accordingly.
 * Checking data consistency/correctness
 * Acquiring additional data
+
+### Loss diverging (infs or nans)? Try:
+
+* Increasing config.model.latent_dim
