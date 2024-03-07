@@ -68,7 +68,7 @@ class Encoder(nn.Module):
     So, at bottleneck layer, input spatial dims are reduced by factor of 2^4 = 16
     """
 
-    def __init__(self, latent_dim, img_dim):
+    def __init__(self):
         super(Encoder, self).__init__()
         self.conv1 = ConvBlock(channels_in=1, channels_out=32, kernel_size=3)
         self.res_block1 = ResNetBlock(channels=32, kernel_size=3)
@@ -162,7 +162,7 @@ class VAE(nn.Module):
         self.z_mean = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)  # 16 = 2**4 - total downsample in encoder
         self.z_log_sigma = nn.Linear(int(256 * (img_dim / 16) ** 2), latent_dim)
         self.epsilon = torch.normal(size=(1, latent_dim), mean=0, std=1.0, device=self.device)
-        self.encoder = Encoder(latent_dim, img_dim)
+        self.encoder = Encoder()
         self.decoder = Decoder(latent_dim, img_dim)
 
         self.xavier_init()
