@@ -1,3 +1,5 @@
+![alt text](tile_0.gif "Axial slice through pelvis. L: input, R: output")
+
 # pet-vae
 2D variational autoencoder for reconstructing PET images implemented in pytorch
 
