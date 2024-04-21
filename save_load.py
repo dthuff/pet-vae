@@ -38,6 +38,7 @@ def save_checkpoint(save_path, model, optimizer, loss_dict, epoch_number):
         os.makedirs(save_dir)
 
     checkpoint = {"model": model.state_dict(),
+                  "epsilon": model.epsilon,
                   "optimizer": optimizer.state_dict(),
                   "loss_dict": loss_dict,
                   "epoch": epoch_number
@@ -63,6 +64,7 @@ def load_from_checkpoint(checkpoint_path, model, optimizer):
 
     # Apply the loaded state dicts to model and optimizer
     model.load_state_dict(checkpoint["model"])
+    model.epsilon = checkpoint["epsilon"]
     optimizer.load_state_dict(checkpoint["optimizer"])
     loss_dict = checkpoint["loss_dict"]
     epoch = checkpoint["epoch"]
