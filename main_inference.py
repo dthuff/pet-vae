@@ -28,10 +28,6 @@ if __name__ == "__main__":
                                                             config['data']['train_val_test_split'],
                                                             torch.Generator().manual_seed(91722))
 
-    val_dataloader = DataLoader(val_dataset,
-                                batch_size=config['model']['batch_size'],
-                                shuffle=True)
-
     test_dataloader = DataLoader(test_dataset,
                                  batch_size=config['model']['batch_size'],
                                  shuffle=True,

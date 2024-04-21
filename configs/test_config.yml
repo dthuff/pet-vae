@@ -1,0 +1,21 @@
+model:
+  batch_size: 64
+  channels: 1
+  img_dim: 128  # Must be a factor of 16 (base UNet has 4 max pools in encoder)
+  latent_dim: 256
+  learning_rate: 0.001
+  max_epochs: 2000
+  weight_decay: 5.e-7
+  device: 'cuda'  # TODO - type
+  resume: False  # Resume training from config.logging.model_save_dir/best_epoch.pth?
+  use_amp: False  # Automatic mixed precision
+
+data:
+  data_dir: "/home/daniel/datasets/ACRIN-NSCLC-FDG-PET-cleaned/"
+  train_val_test_split: [0.8, 0.1, 0.1]
+
+logging:
+  model_save_dir: "/home/daniel/saved_models/pet-vae/models"
+  plot_save_dir: "/home/daniel/saved_models/pet-vae/plots"
+  save_model_every_n_epochs: 50
+  plot_every_n_epochs: 1
