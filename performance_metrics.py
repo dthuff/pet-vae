@@ -60,6 +60,6 @@ def calculate_ssim(original, reconstruction):
         reconstruction_slice_norm = (reconstruction_slice - np.mean(reconstruction_slice)) / np.std(
             reconstruction_slice)
 
-        ssim[sl] = structural_similarity(original_slice_norm, reconstruction_slice_norm)
+        ssim[sl] = structural_similarity(original_slice_norm, reconstruction_slice_norm, data_range=1)
 
     return ssim

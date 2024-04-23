@@ -17,5 +17,5 @@ data:
 logging:
   model_save_dir: "/home/daniel/saved_models/pet-vae/models"
   plot_save_dir: "/home/daniel/saved_models/pet-vae/plots"
-  save_model_every_n_epochs: 5
+  save_model_every_n_epochs: 50
   plot_every_n_epochs: 1
