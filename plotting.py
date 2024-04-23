@@ -80,5 +80,15 @@ def plot_model_architecture(model, batch_size, channels, img_dim, save_dir):
     x = torch.randn(batch_size, channels, img_dim, img_dim)
     x = x.to(device="cuda")
     y = model(x)
-
     make_dot(y, params=dict(model.named_parameters())).render(os.path.join(save_dir, "model.png"))
+
+
+def plot_performance(ssim, psnr, save_dir):
+    fig, axs = plt.subplots(1, 2, figsize=(8, 6))
+    axs[0].hist(ssim)
+    axs[0].set_title("SSIM")
+    axs[1].hist(psnr)
+    axs[1].set_title("PSNR")
+    axs[1].set_xlabel("dB")
+    plt.savefig(os.path.join(save_dir, "perf_metrics.png"))
+    print(f"Saved performance metric plot to: {os.path.join(save_dir, 'perf_metrics.png')}")

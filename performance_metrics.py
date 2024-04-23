@@ -5,7 +5,7 @@ from skimage.metrics import structural_similarity
 
 def calculate_psnr(original, reconstruction):
     """
-    Compute Peak signal-to-noise between the original image and the reconstructed image
+    Compute Peak signal-to-noise ratio (PSNR) between the original image and the reconstructed image
     Args:
         original: tensor
             input image. Shape is batch, channel, h, w
@@ -25,12 +25,9 @@ def calculate_psnr(original, reconstruction):
         original_slice = np.squeeze(original[sl, :, :])
         reconstruction_slice = np.squeeze(reconstruction[sl, :, :])
 
-        original_slice_norm = (original_slice - np.mean(original_slice)) / np.std(original_slice)
-        reconstruction_slice_norm = (reconstruction_slice - np.mean(reconstruction_slice)) / np.std(
-            reconstruction_slice)
+        mse = np.mean((original_slice - reconstruction_slice) ** 2)
+        psnr[sl] = 20 * np.log10(np.max(original_slice) / np.sqrt(mse))
 
-        mse = np.mean((original_slice_norm - reconstruction_slice_norm) ** 2)
-        psnr[sl] = 20 * np.log10(1 / np.sqrt(mse))
     return psnr
 
 
