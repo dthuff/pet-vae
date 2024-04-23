@@ -1,15 +1,15 @@
 import os
 
-import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 
 from dataloader import DicomDataset, image_transform
 from loss import KLDivergence, L2Loss
-from model import VAE
-from save_load import load_from_checkpoint, load_config, create_output_directories
 from main_train import parse_cl_args
+from model import VAE
+from plotting import plot_performance
+from save_load import load_from_checkpoint, load_config, create_output_directories
 from train import test_loop
 
 if __name__ == "__main__":
@@ -57,9 +57,4 @@ if __name__ == "__main__":
     flat_ssim = [item for sublist in perf_metrics["ssim"] for item in sublist]
     flat_psnr = [item for sublist in perf_metrics["psnr"] for item in sublist]
 
-    # TODO - move to plotting.py
-    fig, axs = plt.subplots(1, 2, figsize=(8, 6))
-    axs[0].hist(flat_ssim)
-    axs[1].hist(flat_psnr)
-    plt.savefig(os.path.join(config["logging"]["plot_save_dir"], "perf_metrics.png"))
-    plt.show()
+    plot_performance(flat_ssim, flat_psnr, config["logging"]["plot_save_dir"])
